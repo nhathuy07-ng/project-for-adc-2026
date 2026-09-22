@@ -1,0 +1,359 @@
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+
+    margin:0;
+    background:#eeeeee;
+    font-family:"Arial", sans-serif;
+    color:#333;
+
+}
+
+
+
+
+.page{
+
+    width:210mm;
+    min-height:297mm;
+
+    margin:20px auto;
+
+    background:white;
+
+    display:grid;
+
+    grid-template-columns:32% 68%;
+
+    overflow:hidden;
+
+}
+
+
+
+
+/* LEFT SIDEBAR */
+
+.sidebar{
+
+    background:#333333;
+
+    color:white;
+
+    padding:40px 35px;
+
+}
+
+
+
+.profile-header h1{
+
+    font-size:52px;
+
+    line-height:0.9;
+
+    margin:0;
+
+    font-weight:700;
+
+    letter-spacing:1px;
+
+}
+
+
+
+.profile-header h2{
+
+    margin-top:10px;
+
+    font-size:22px;
+
+    font-weight:400;
+
+}
+
+
+
+.contact-section{
+
+    margin-top:35px;
+
+    font-size:13px;
+
+}
+
+
+
+.contact-section p{
+
+    margin:14px 0;
+
+}
+
+
+
+
+.side-section{
+
+    margin-top:35px;
+
+}
+
+
+
+.side-section h3{
+
+    font-size:18px;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+    border-bottom:1px solid white;
+
+    padding-bottom:8px;
+
+    margin-bottom:15px;
+
+}
+
+
+
+.side-section p,
+.side-section li{
+
+    font-size:13px;
+
+    line-height:1.6;
+
+}
+
+
+
+.side-section ul{
+
+    padding-left:18px;
+
+}
+
+
+
+.skill-scale{
+
+    margin-top:20px;
+
+    font-size:11px;
+
+    opacity:.8;
+
+}
+
+
+
+
+
+
+
+/* RIGHT CONTENT */
+
+
+.content{
+
+    padding:45px 45px 40px 55px;
+
+}
+
+
+
+.section-title{
+
+    font-size:26px;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+    margin:0 0 30px;
+
+    letter-spacing:.5px;
+
+}
+
+
+
+
+/* TIMELINE */
+
+
+.timeline{
+
+    position:relative;
+
+}
+
+
+
+.timeline:before{
+
+    content:"";
+
+    position:absolute;
+
+    left:105px;
+
+    top:0;
+
+    bottom:0;
+
+    width:2px;
+
+    background:#555;
+
+}
+
+
+
+
+.timeline-item{
+
+    display:grid;
+
+    grid-template-columns:85px 20px 1fr;
+
+    column-gap:18px;
+
+    position:relative;
+
+    margin-bottom:35px;
+
+}
+
+
+
+.time{
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    text-align:right;
+
+    line-height:1.5;
+
+}
+
+
+
+
+.circle{
+
+    width:14px;
+
+    height:14px;
+
+    background:#333;
+
+    border-radius:50%;
+
+    margin-top:4px;
+
+    z-index:2;
+
+}
+
+
+
+
+.description h3{
+
+    font-size:16px;
+
+    margin:0 0 12px;
+
+    font-weight:700;
+
+}
+
+
+
+
+.description p,
+.description li{
+
+    font-size:13px;
+
+    line-height:1.55;
+
+}
+
+
+
+.description ul{
+
+    padding-left:18px;
+
+    margin-top:0;
+
+}
+
+
+
+
+
+
+/* AWARDS */
+
+
+.award{
+
+    margin-bottom:20px;
+
+}
+
+
+
+.award strong{
+
+    font-size:15px;
+
+}
+
+
+
+.award p{
+
+    font-size:13px;
+
+    margin-top:6px;
+
+}
+
+
+
+
+
+
+/* PRINT */
+
+@media print{
+
+
+body{
+
+    background:white;
+
+}
+
+
+
+.page{
+
+    margin:0;
+
+}
+
+
+}

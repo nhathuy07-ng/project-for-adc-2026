@@ -1,0 +1,492 @@
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+
+    margin:0;
+    background:#e7e7e7;
+    font-family:"Arial", Helvetica, sans-serif;
+    color:#30394d;
+
+}
+
+
+
+.page{
+
+    width:210mm;
+    min-height:297mm;
+    margin:30px auto;
+    background:white;
+    overflow:hidden;
+
+}
+
+
+
+
+
+
+
+/* ================= HEADER ================= */
+
+
+.header{
+
+    height:82mm;
+    position:relative;
+
+    padding:0;
+
+    background:#f3f3f3;
+
+}
+
+
+
+.profile-area{
+
+    position:absolute;
+
+    left:16mm;
+
+    top:13mm;
+
+}
+
+
+
+.profile{
+
+    width:43mm;
+
+    height:43mm;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+}
+
+
+
+
+
+.identity{
+
+    position:absolute;
+
+    left:63mm;
+
+    top:14mm;
+
+}
+
+
+
+.identity h1{
+
+    margin:0;
+
+    color:#30394d;
+
+    font-size:58px;
+
+    line-height:0.95;
+
+    font-weight:700;
+
+    letter-spacing:7px;
+
+}
+
+
+
+.role{
+
+    margin-top:12px;
+
+    font-size:20px;
+
+    color:#30394d;
+
+    letter-spacing:0.5px;
+
+}
+
+
+
+
+
+
+
+/* CONTACT BAR */
+
+
+.contact-row{
+
+    position:absolute;
+
+    bottom:13mm;
+
+    left:16mm;
+
+    right:16mm;
+
+
+    display:grid;
+
+    grid-template-columns:
+    1fr 1.4fr 1.4fr 1.5fr;
+
+
+    align-items:center;
+
+
+    gap:10px;
+
+
+    font-size:10px;
+
+    color:#30394d;
+
+}
+
+
+
+.contact-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    line-height:1.3;
+
+}
+
+
+
+.icon{
+
+    width:18px;
+
+    height:18px;
+
+    border-radius:50%;
+
+    background:#30394d;
+
+    color:white;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:9px;
+
+}
+
+
+
+
+
+
+
+
+/* ================= BODY ================= */
+
+
+.body{
+
+    display:grid;
+
+    grid-template-columns:32% 68%;
+
+}
+
+
+
+
+
+
+
+/* ================= SIDEBAR ================= */
+
+
+.sidebar{
+
+    background:#343d52;
+
+    color:white;
+
+    padding:
+
+    11mm
+
+    10mm;
+
+
+    min-height:215mm;
+
+}
+
+
+
+.sidebar h2{
+
+    margin:0 0 18px;
+
+    font-size:19px;
+
+    letter-spacing:.5px;
+
+}
+
+
+
+.sidebar p{
+
+    margin:0 0 30px;
+
+    font-size:10.5px;
+
+    line-height:1.55;
+
+    text-align:justify;
+
+}
+
+
+
+.edu{
+
+    margin-bottom:22px;
+
+    font-size:11px;
+
+    line-height:1.5;
+
+}
+
+
+
+.edu strong{
+
+    font-size:13px;
+
+}
+
+
+
+.sidebar ul{
+
+    margin:0;
+
+    padding-left:17px;
+
+}
+
+
+
+.sidebar li{
+
+    margin-bottom:12px;
+
+    font-size:11.5px;
+
+}
+
+
+
+
+
+
+
+
+
+/* ================= RIGHT CONTENT ================= */
+
+
+.content{
+
+    padding:
+
+    11mm
+
+    12mm;
+
+}
+
+
+
+.dark-title{
+
+    margin:0 0 25px;
+
+    font-size:20px;
+
+    letter-spacing:.5px;
+
+    color:#30394d;
+
+}
+
+
+
+
+
+
+.experience{
+
+    position:relative;
+
+    margin-bottom:27px;
+
+    padding-right:28mm;
+
+}
+
+
+
+.experience h3{
+
+    margin:0 0 5px;
+
+    font-size:14px;
+
+    font-weight:700;
+
+}
+
+
+
+.experience strong{
+
+    font-size:12px;
+
+}
+
+
+
+.experience p{
+
+    margin-top:8px;
+
+    margin-bottom:0;
+
+    font-size:10.5px;
+
+    line-height:1.5;
+
+    color:#666;
+
+}
+
+
+
+.year{
+
+    position:absolute;
+
+    right:0;
+
+    top:0;
+
+    font-size:13px;
+
+    font-weight:bold;
+
+    white-space:nowrap;
+
+}
+
+
+
+
+
+
+
+
+/* ================= REFERENCES ================= */
+
+
+.references{
+
+    margin-top:30px;
+
+}
+
+
+
+.reference-grid{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:35px;
+
+}
+
+
+
+.reference-grid h3{
+
+    margin:0 0 5px;
+
+    font-size:14px;
+
+}
+
+
+
+.reference-grid strong{
+
+    font-size:11px;
+
+}
+
+
+
+.reference-grid p{
+
+    font-size:10px;
+
+    line-height:1.5;
+
+}
+
+
+
+
+
+
+
+
+/* PRINT / SCREEN */
+
+
+@media print{
+
+
+body{
+
+    background:white;
+
+}
+
+
+.page{
+
+    margin:0;
+
+}
+
+
+}
