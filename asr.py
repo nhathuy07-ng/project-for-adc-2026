@@ -2,13 +2,19 @@ from transformers import pipeline
 import time
 import queue
 import threading
-import json
-
 
 pipe = pipeline("automatic-speech-recognition", model="openai/whisper-base")
 
 job_queue: queue.Queue[tuple[str, str]] = queue.Queue()
 job_results: dict[str, str] = {}
+
+def gen_job_id():
+    return str(time.time_ns())
+
+def wait_asr_result(job_id: str):
+    while job_id not in job_results:
+        time.sleep(0.02)
+    return job_results[job_id]
 
 def asr_loop():
     while True:
