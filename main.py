@@ -1,4 +1,5 @@
 import enum
+from portfolio_data_classes import ResumeInfo
 
 """
 Class definition
@@ -16,48 +17,19 @@ class SessionData:
         self.profileType: ProfileType = None
         self.interactionMode: InteractionMode = None
 
-class Experience:
-    def __init__(self):
-        self.orgName = ""
-        self.address = ""
-        self.jobTitle = ""
-        self.highlightContribution = ""
-        self.contributions = []
-        self.startTime = ""
-        self.endTime = ""
-
-class Education:
-    def __init__(self):
-        self.institution: str = ""
-        self.details: list[str] = ""
-        self.graduationTime: str = ""
-        self.location: str = ""
-        
-
-class UserInfo:
-    def __init__(self):
-        self.fullName: str = None
-        self.location: str = None
-        self.contacts: list[str] = []
-        self.targetJobTitle: str = None
-        self.profileURL: str = ""
-        self.professionalSummary: str = "" # basic HTML tags allowed
-        self.experience: list[Experience] = []
-        self.education: list[]
-        self.skillsAndTools: list[str] = [] # one item per line, basic HTML tags allowed
-
-
 """
 Single-user use
 """
-
 class SingleUserUse:
     def __init__(self):
         self.setUp()
 
     def setUp(self):
-        self.userInfo = UserInfo()
+        self.userInfo = ResumeInfo()
         self.sessionData = SessionData()
 
     def introductoryFlow():
         pass
+
+
+singleUser = SingleUserUse()
