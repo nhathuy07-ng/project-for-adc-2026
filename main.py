@@ -41,17 +41,31 @@ class InteractionMode(enum.Enum):
     GUIDED = 1
     SCRIBE = 2
 
+from pydantic import BaseModel, Field
+
+class UserIntent(BaseModel):
+    intent: str = Field(description="Must be exactly one of: 'PROVIDE_INFO', 'CONFIRM', 'EXIT'. Use PROVIDE_INFO if the user is giving resume details or amending previous details. Use CONFIRM if they are saying 'continue', 'yes', 'looks good'. Use EXIT if they want to stop or quit.")
+    summary_of_provided_info: str = Field(default="", description="If intent is PROVIDE_INFO, summarize what the user just provided in 1 short sentence (e.g., 'I noted down your email as bob@email.com').")
+
 class SessionData:
     def __init__(self):
         self.profileType: ProfileType = None
         self.interactionMode: InteractionMode = None
         self.currentStep: int = 0
         self.resumeInfo = ResumeInfo()
-        self.state = "ASKING" # ASKING, WAITING_FOR_CONFIRM, or FINAL_REVIEW
+        self.state = "ASKING" # ASKING, WAITING_FOR_CONFIRM, FINAL_REVIEW, SELECT_TEMPLATE, CONFIRM_EXIT
+        self.previous_state = "ASKING"
         self.last_transcript = ""
         self.answers = []
 
 session_data = SessionData()
+
+# Load CV metadata
+try:
+    with open("cv_metadata.json", "r") as f:
+        cv_metadata = json.load(f)
+except FileNotFoundError:
+    cv_metadata = {}
 
 def get_tts_base64(text: str):
     tts_file = tts_once(text)
@@ -60,6 +74,38 @@ def get_tts_base64(text: str):
     sound.export(processed_file, format="wav")
     with open(processed_file, "rb") as f:
         return base64.b64encode(f.read()).decode("utf-8")
+
+import jinja2
+import pdfkit
+
+def export_cv(template_key: str, resume_data: dict) -> str:
+    template_info = cv_metadata.get(template_key)
+    if not template_info:
+        return "Error: Template not found."
+        
+    index_path = template_info["index_path"]
+    template_dir = os.path.dirname(index_path)
+    template_file = os.path.basename(index_path)
+    
+    env = jinja2.Environment(loader=jinja2.FileSystemLoader(template_dir))
+    template = env.get_template(template_file)
+    
+    cv_data = resume_data
+    
+    rendered_html = template.render(**cv_data)
+    
+    os.makedirs("exports", exist_ok=True)
+    pdf_path = f"exports/cv_{int(time.time())}.pdf"
+    
+    try:
+        pdfkit.from_string(rendered_html, pdf_path, options={"enable-local-file-access": ""})
+        return f"Successfully generated PDF at {pdf_path}"
+    except Exception as e:
+        print(f"PDF generation failed (wkhtmltopdf missing?): {e}")
+        html_path = pdf_path.replace(".pdf", ".html")
+        with open(html_path, "w", encoding="utf-8") as f:
+            f.write(rendered_html)
+        return f"Saved as HTML at {html_path} because PDF generation failed."
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
@@ -111,85 +157,148 @@ async def websocket_endpoint(websocket: WebSocket):
                 transcript = wait_asr_result(job_id)
                 print(f"Transcript: {transcript}")
                 
-                if session_data.state == "ASKING":
-                    # Process answer
-                    session_data.last_transcript = transcript
-                    
-                    readback = f"I noted down: {transcript}. If this is the right information, say 'continue.' Else, tell me what to change."
-                    session_data.state = "WAITING_FOR_CONFIRM"
-                    audio_b64 = get_tts_base64(readback)
-                    
-                    await websocket.send_text(json.dumps({
-                        "type": "audio",
-                        "text": readback,
-                        "audio_data": audio_b64
-                    }))
-                    
-                elif session_data.state == "WAITING_FOR_CONFIRM":
-                    if "continue" in transcript.lower():
-                        # Save the final confirmed answer for this step
-                        session_data.answers.append(session_data.last_transcript)
+                if session_data.state in ["ASKING", "WAITING_FOR_CONFIRM"]:
+                    print("Classifying intent...")
+                    intent_json_str = query_ai(transcript, UserIntent)
+                    try:
+                        user_intent = UserIntent.model_validate_json(intent_json_str)
+                    except Exception as e:
+                        print("Failed to parse intent:", e)
+                        user_intent = UserIntent(intent="PROVIDE_INFO", summary_of_provided_info=transcript)
                         
-                        if session_data.currentStep < len(step_prompts) - 1:
-                            # Proceed to next question
-                            confirmation_text = "Got it, moving to the next question."
-                            session_data.currentStep += 1
-                            session_data.state = "ASKING"
-                            
-                            next_prompt = step_prompts[session_data.currentStep]
-                            combined_text = f"{confirmation_text} {next_prompt}"
-                            
-                            audio_b64 = get_tts_base64(combined_text)
-                            await websocket.send_text(json.dumps({
-                                "type": "audio",
-                                "text": combined_text,
-                                "audio_data": audio_b64
-                            }))
-                        else:
-                            # Final readback
-                            session_data.state = "FINAL_REVIEW"
-                            full_cv = " ".join(session_data.answers)
-                            final_text = f"Got it. We have finished all the questions. Here is your full CV so far: {full_cv}. Does everything sound complete, or would you like to make any changes?"
-                            audio_b64 = get_tts_base64(final_text)
-                            
-                            await websocket.send_text(json.dumps({
-                                "type": "audio",
-                                "text": final_text,
-                                "audio_data": audio_b64
-                            }))
-                    else:
-                        # Handle amendment
-                        session_data.last_transcript += " " + transcript
-                        readback = f"I updated it to: {transcript}. If this is the right information, say 'continue.' Else, tell me what to change."
-                        audio_b64 = get_tts_base64(readback)
-                        
+                    print(f"Intent classified as: {user_intent.intent}")
+                    
+                    if user_intent.intent == "EXIT":
+                        session_data.previous_state = session_data.state
+                        session_data.state = "CONFIRM_EXIT"
+                        exit_msg = "Are you sure you want to exit and discard your session? Say yes to exit, or no to continue."
+                        audio_b64 = get_tts_base64(exit_msg)
                         await websocket.send_text(json.dumps({
-                            "type": "audio",
-                            "text": readback,
-                            "audio_data": audio_b64
+                            "type": "audio", "text": exit_msg, "audio_data": audio_b64
+                        }))
+                        
+                    elif user_intent.intent == "CONFIRM":
+                        if session_data.state == "WAITING_FOR_CONFIRM":
+                            if session_data.currentStep < len(step_prompts) - 1:
+                                session_data.currentStep += 1
+                                session_data.state = "ASKING"
+                                next_prompt = step_prompts[session_data.currentStep]
+                                combined_text = f"Got it. Next question: {next_prompt}"
+                                audio_b64 = get_tts_base64(combined_text)
+                                await websocket.send_text(json.dumps({
+                                    "type": "audio", "text": combined_text, "audio_data": audio_b64
+                                }))
+                            else:
+                                session_data.state = "FINAL_REVIEW"
+                                final_text = "Got it. We have finished all the questions. Is there anything else you want to amend before we choose a design?"
+                                audio_b64 = get_tts_base64(final_text)
+                                await websocket.send_text(json.dumps({
+                                    "type": "audio", "text": final_text, "audio_data": audio_b64
+                                }))
+                        else:
+                            # User confirmed without providing info, possibly skipped.
+                            pass
+                            
+                    elif user_intent.intent == "PROVIDE_INFO":
+                        print("Structuring data...")
+                        prompt_input = f"Current JSON: {session_data.resumeInfo.model_dump_json()}\n\nNew User Input to merge: {transcript}"
+                        try:
+                            updated_json_str = query_ai(prompt_input, ResumeInfo)
+                            session_data.resumeInfo = ResumeInfo.model_validate_json(updated_json_str)
+                        except Exception as e:
+                            print("Failed to merge info:", e)
+                            
+                        readback = f"{user_intent.summary_of_provided_info} If this is right, say continue. Else, tell me what to change."
+                        session_data.state = "WAITING_FOR_CONFIRM"
+                        audio_b64 = get_tts_base64(readback)
+                        await websocket.send_text(json.dumps({
+                            "type": "audio", "text": readback, "audio_data": audio_b64
+                        }))
+                        
+                elif session_data.state == "CONFIRM_EXIT":
+                    if any(word in transcript.lower() for word in ["yes", "exit", "stop", "quit", "discard", "confirm", "sure"]):
+                        session_data.state = "DONE"
+                        msg = "Session discarded. Goodbye!"
+                        audio_b64 = get_tts_base64(msg)
+                        await websocket.send_text(json.dumps({
+                            "type": "audio", "text": msg, "audio_data": audio_b64
+                        }))
+                    else:
+                        session_data.state = session_data.previous_state
+                        msg = "Okay, let's continue."
+                        audio_b64 = get_tts_base64(msg)
+                        await websocket.send_text(json.dumps({
+                            "type": "audio", "text": msg, "audio_data": audio_b64
                         }))
                         
                 elif session_data.state == "FINAL_REVIEW":
-                    # Simple confirmation logic for the final CV
-                    if any(word in transcript.lower() for word in ["good", "yes", "perfect", "continue", "done"]):
-                        final_msg = "Great! Your CV is now ready for export."
+                    intent_json_str = query_ai(transcript, UserIntent)
+                    try:
+                        user_intent = UserIntent.model_validate_json(intent_json_str)
+                    except:
+                        user_intent = UserIntent(intent="CONFIRM", summary_of_provided_info="")
+                        
+                    if user_intent.intent == "EXIT":
+                        session_data.previous_state = "FINAL_REVIEW"
+                        session_data.state = "CONFIRM_EXIT"
+                        exit_msg = "Are you sure you want to exit and discard your session? Say yes to exit, or no to continue."
+                        audio_b64 = get_tts_base64(exit_msg)
+                        await websocket.send_text(json.dumps({
+                            "type": "audio", "text": exit_msg, "audio_data": audio_b64
+                        }))
+                    elif user_intent.intent == "PROVIDE_INFO":
+                        prompt_input = f"Current JSON: {session_data.resumeInfo.model_dump_json()}\n\nNew User Input to merge: {transcript}"
+                        try:
+                            updated_json_str = query_ai(prompt_input, ResumeInfo)
+                            session_data.resumeInfo = ResumeInfo.model_validate_json(updated_json_str)
+                        except:
+                            pass
+                        msg = f"I noted that change: {user_intent.summary_of_provided_info}. Does the rest look good?"
+                        audio_b64 = get_tts_base64(msg)
+                        await websocket.send_text(json.dumps({
+                            "type": "audio", "text": msg, "audio_data": audio_b64
+                        }))
+                    else:
+                        session_data.state = "SELECT_TEMPLATE"
+                        options_texts = []
+                        for idx, (key, info) in enumerate(cv_metadata.items()):
+                            options_texts.append(f"Option {idx + 1} is {info['name']}. {info['description']}")
+                            
+                        templates_summary = " ".join(options_texts)
+                        select_msg = f"Great! Let's choose a design. We have {len(cv_metadata)} options. {templates_summary} Which one would you prefer?"
+                        audio_b64 = get_tts_base64(select_msg)
+                        
+                        await websocket.send_text(json.dumps({
+                            "type": "audio",
+                            "text": select_msg,
+                            "audio_data": audio_b64
+                        }))
+                        
+                elif session_data.state == "SELECT_TEMPLATE":
+                    # Simple heuristic mapping for now instead of LLM to save latency
+                    chosen_key = None
+                    transcript_lower = transcript.lower()
+                    for idx, (key, info) in enumerate(cv_metadata.items()):
+                        # Check for option number or name keyword
+                        if str(idx + 1) in transcript_lower or info['name'].lower().split()[0] in transcript_lower:
+                            chosen_key = key
+                            break
+                            
+                    if not chosen_key and cv_metadata:
+                        chosen_key = list(cv_metadata.keys())[0] # Default to first if not understood
+                        
+                    if chosen_key:
                         session_data.state = "DONE"
+                        
+                        # Export
+                        export_result = export_cv(chosen_key, session_data.resumeInfo.model_dump())
+                        
+                        final_msg = f"Perfect, I've selected that template and generated your file. {export_result}"
                         audio_b64 = get_tts_base64(final_msg)
                         
                         await websocket.send_text(json.dumps({
                             "type": "audio",
                             "text": final_msg,
-                            "audio_data": audio_b64
-                        }))
-                    else:
-                        # User wants a change to the overall CV
-                        session_data.answers.append(f"(Amendment: {transcript})")
-                        msg = "I have noted that change. Does the rest of the CV look good now?"
-                        audio_b64 = get_tts_base64(msg)
-                        
-                        await websocket.send_text(json.dumps({
-                            "type": "audio",
-                            "text": msg,
                             "audio_data": audio_b64
                         }))
                         

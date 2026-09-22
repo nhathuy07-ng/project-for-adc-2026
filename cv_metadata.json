@@ -1,0 +1,62 @@
+{
+    "ATS-Friendly CV/ATS_Simple_CV_HTML": {
+        "name": "ATS Simple",
+        "description": "This template features a top-down, single-column structure with contact information centered at the header. Experience and Education sections are positioned sequentially with bolded role titles aligned to the left and dates to the right. It avoids any tables, columns, or sidebars to ensure the text flow is parsed continuously from top to bottom.",
+        "path": "CVs/ATS-Friendly CV/ATS_Simple_CV_HTML",
+        "index_path": "CVs/ATS-Friendly CV/ATS_Simple_CV_HTML/index.html"
+    },
+    "ATS-Friendly CV/Black_White_Professional_ATS_CV_HTML": {
+        "name": "Black and White Professional",
+        "description": "A strict single-column layout where a horizontal line separates the name header from the main body. The Work History section dominates the page, employing a standardized bullet-point structure for responsibilities. Skills are listed linearly at the bottom, prioritizing dense text over visual padding.",
+        "path": "CVs/ATS-Friendly CV/Black_White_Professional_ATS_CV_HTML",
+        "index_path": "CVs/ATS-Friendly CV/Black_White_Professional_ATS_CV_HTML/index.html"
+    },
+    "Academic CV/Academic_CV_Research_Template": {
+        "name": "Academic Research",
+        "description": "This multi-page layout prioritizes a massive 'Publications and Presentations' section immediately following the education block. It uses hanging indents to clearly separate individual citations or grants within long lists. The margins are slightly wider to accommodate dense paragraphs of research summaries without feeling cluttered.",
+        "path": "CVs/Academic CV/Academic_CV_Research_Template",
+        "index_path": "CVs/Academic CV/Academic_CV_Research_Template/index.html"
+    },
+    "Academic CV/Research_CV_HTML": {
+        "name": "Modern Research",
+        "description": "A distinct two-column layout split vertically, with a narrow left sidebar and a wide right main body. The left sidebar is dedicated to static information like contact details, technical skills, and affiliations, drawing quick attention. The right column emphasizes a deep dive into research projects and teaching experience with nested bullet points.",
+        "path": "CVs/Academic CV/Research_CV_HTML",
+        "index_path": "CVs/Academic CV/Research_CV_HTML/index.html"
+    },
+    "Infographic CV/Grey_Pink_Minimal_Graphic_Designer_Resume": {
+        "name": "Grey and Pink Infographic",
+        "description": "This layout positions a striking visual header block at the top, containing a large profile picture and brief bio. The skills section utilizes horizontal progress bars instead of plain text, offering a quick visual summary of technical proficiencies. The layout heavily emphasizes portfolio links and creative software skills over traditional chronological job descriptions.",
+        "path": "CVs/Infographic CV/Grey_Pink_Minimal_Graphic_Designer_Resume",
+        "index_path": "CVs/Infographic CV/Grey_Pink_Minimal_Graphic_Designer_Resume/index.html"
+    },
+    "Infographic CV/Visual_Timeline_CV_HTML": {
+        "name": "Visual Timeline",
+        "description": "The core of this layout is a vertical line running down the exact center of the page, acting as a chronological axis. Experiences and education nodes branch off alternately to the left and right of this central timeline. This non-traditional structure emphasizes the narrative progression of your career rather than just listing responsibilities.",
+        "path": "CVs/Infographic CV/Visual_Timeline_CV_HTML",
+        "index_path": "CVs/Infographic CV/Visual_Timeline_CV_HTML/index.html"
+    },
+    "Modern Minimalist CV/Creative-Modern-Minimalist-CV": {
+        "name": "Creative Modern Minimalist",
+        "description": "This design utilizes an asymmetric two-column grid where the left column is slightly wider than the right. The left column focuses on detailed work experience with spacious line height, while the right column compactly stacks education and skills. Prominent whitespace is used strategically between sections to create a clean, uncrowded reading experience.",
+        "path": "CVs/Modern Minimalist CV/Creative-Modern-Minimalist-CV",
+        "index_path": "CVs/Modern Minimalist CV/Creative-Modern-Minimalist-CV/index.html"
+    },
+    "Modern Minimalist CV/Pink-Minimalist-Clean-CV": {
+        "name": "Pink Minimalist Clean",
+        "description": "A centered, single-column layout where the header, summary, and section titles are aligned to the middle of the page. The content beneath each section title spans the full width but uses substantial padding on the left and right margins to keep the line lengths readable. Experience entries highlight the company name in a distinct color, drawing the eye directly to your previous employers.",
+        "path": "CVs/Modern Minimalist CV/Pink-Minimalist-Clean-CV",
+        "index_path": "CVs/Modern Minimalist CV/Pink-Minimalist-Clean-CV/index.html"
+    },
+    "Traditional Professional CV/Harvard_CV_HTML": {
+        "name": "Harvard Traditional",
+        "description": "This layout strictly adheres to classical formatting, placing the name in a large serif font at the top center, flanked by contact info. It relies on small caps for section headers and italicized text for job titles, positioned flush left. Dates are right-aligned on the same line as the company name, creating a highly structured, rigid grid.",
+        "path": "CVs/Traditional Professional CV/Harvard_CV_HTML",
+        "index_path": "CVs/Traditional Professional CV/Harvard_CV_HTML/index.html"
+    },
+    "Traditional Professional CV/Professional_CV_HTML": {
+        "name": "Classic Professional",
+        "description": "A balanced, full-width layout that separates the summary header from the main content with a thick colored border. The experience section uses a two-tier hierarchy, bolding the job title while placing the company name directly below in a lighter weight. A dedicated 'Core Competencies' grid sits at the very top, immediately highlighting key skills before the chronological history begins.",
+        "path": "CVs/Traditional Professional CV/Professional_CV_HTML",
+        "index_path": "CVs/Traditional Professional CV/Professional_CV_HTML/index.html"
+    }
+}
