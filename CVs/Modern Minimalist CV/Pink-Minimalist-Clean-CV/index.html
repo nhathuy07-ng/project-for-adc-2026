@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Lorna Alvarado CV</title>
+<title>{{ fullName }} CV</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -27,11 +27,11 @@
 <header>
 
 <h1>
-LORNA ALVARADO
+{{ fullName | upper }}
 </h1>
 
 <h2>
-Sales Representative
+{{ targetJobTitle }}
 </h2>
 
 
@@ -43,6 +43,7 @@ Sales Representative
 
 <!-- SUMMARY -->
 
+{% if professionalSummary %}
 <section class="section">
 
 <h3>
@@ -51,14 +52,12 @@ S U M M A R Y
 
 
 <p>
-I am a Sales Representative is a professional who initializes and
-manages relationships with customers. They serve as their point of
-contact and lead from initial outreach through the making of the final
-purchase by them or someone in their household.
+{{ professionalSummary | safe }}
 </p>
 
 
 </section>
+{% endif %}
 
 
 
@@ -73,6 +72,7 @@ purchase by them or someone in their household.
 
 <!-- EXPERIENCE -->
 
+{% if experience %}
 <section class="section">
 
 
@@ -81,132 +81,42 @@ E X P E R I E N C E
 </h3>
 
 
-
+{% for exp in experience %}
 <div class="job">
 
 
 <h4>
-SENIOR SALES REPRESENTATIVE
+{{ exp.jobTitle | upper }}
 </h4>
 
 
 <span>
-Timmerman Industries
+{{ exp.orgNameOrType }}
 </span>
 
 
 <strong>
-January 2021 to Present
+{{ exp.startTime }} to {{ exp.endTime }}
 </strong>
 
 
 <ul>
-
+{% for contribution in exp.contributions %}
 <li>
-Developed and executed sales strategies, resulting in a 25% increase in annual revenue. Managed a portfolio of 50+ clients, achieving a 95% customer retention rate.
+{{ contribution }}
 </li>
-
-
-<li>
-Conducted market research to identify new business opportunities and target prospects.
-</li>
-
-
+{% endfor %}
 </ul>
 
 
 </div>
-
-
-
-
-
-
-
-<div class="job">
-
-
-<h4>
-FMCG SALES AGENT
-</h4>
-
-
-<span>
-Timmerman Industries
-</span>
-
-
-<strong>
-June 2018 to December 2020
-</strong>
-
-
-
-<ul>
-
-<li>
-Prospected and qualified leads through cold calling, email campaigns, and networking events.
-</li>
-
-
-<li>
-Increased sales by 20% by implementing effective upselling and cross-selling strategies.
-</li>
-
-
-</ul>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="job">
-
-
-<h4>
-SALES AGENT
-</h4>
-
-
-<span>
-Timmerman Industries
-</span>
-
-
-<strong>
-June 2017 to December 2018
-</strong>
-
-
-
-<ul>
-
-<li>
-Visited corporate client offices to offer latest products.
-</li>
-
-
-<li>
-Built relationships with clients to maintain sales goals and create new opportunities.
-</li>
-
-
-</ul>
-
-
-
-</div>
+{% endfor %}
 
 
 
 
 </section>
+{% endif %}
 
 
 
@@ -245,31 +155,17 @@ Built relationships with clients to maintain sales goals and create new opportun
 <!-- CONTACT -->
 
 
+{% if contacts %}
 <section class="side-section contact">
 
-
+{% for contact in contacts %}
 <div>
-☎ &nbsp;123-456-7890
+{{ contact }}
 </div>
-
-
-<div>
-✉ &nbsp;hello@reallygreatsite.com
-</div>
-
-
-<div>
-◎ &nbsp;123 Anywhere St., Any City
-</div>
-
-
-<div>
-◎ &nbsp;reallygreatsite.com
-</div>
-
-
+{% endfor %}
 
 </section>
+{% endif %}
 
 
 
@@ -287,6 +183,7 @@ Built relationships with clients to maintain sales goals and create new opportun
 <!-- EDUCATION -->
 
 
+{% if education %}
 <section class="side-section">
 
 
@@ -295,52 +192,32 @@ E D U C A T I O N
 </h3>
 
 
-
+{% for edu in education %}
 <div class="education">
 
 
 <b>
-Borcelle University
+{{ edu.institution }}
 </b>
 
 
 <br>
 
-Bachelor of Business Management
-
+{% for detail in edu.details %}
+{{ detail }}
 <br>
+{% endfor %}
 
-2020 - 2023
+{{ edu.graduationTime }}
 
 
 </div>
-
-
-
-
-
-<div class="education">
-
-
-<b>
-Wardiere University
-</b>
-
-
-<br>
-
-Bachelor of Business Management
-
-<br>
-
-2016 - 2020
-
-
-</div>
+{% endfor %}
 
 
 
 </section>
+{% endif %}
 
 
 
@@ -357,6 +234,7 @@ Bachelor of Business Management
 <!-- SKILLS -->
 
 
+{% if skillsAndTools %}
 <section class="side-section">
 
 
@@ -367,37 +245,17 @@ S K I L L S
 
 
 <ul>
-
-<li>Client Acquisition</li>
-
-<li>B2B Sales</li>
-
-<li>Negotiation</li>
-
-<li>Relationship Management</li>
-
-<li>Market Analysis</li>
-
-<li>Sales Strategies</li>
-
-<li>Negotiation Skills</li>
-
-<li>Problem-Solving</li>
-
-<li>Time Management</li>
-
-<li>Presentation Skills</li>
-
-<li>Networking</li>
-
-<li>Market Research</li>
-
-
+{% for group in skillsAndTools %}
+{% for skill in group.detailedSkillsOrTools %}
+<li>{{ skill }}</li>
+{% endfor %}
+{% endfor %}
 </ul>
 
 
 
 </section>
+{% endif %}
 
 
 

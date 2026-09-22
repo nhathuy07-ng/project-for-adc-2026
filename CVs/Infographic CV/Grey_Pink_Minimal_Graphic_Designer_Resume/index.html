@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Claudia Alves Resume</title>
+<title>{{ fullName }} Resume</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -20,7 +20,7 @@
 
 <div class="top-tags">
     <div class="tag">RESUME</div>
-    <div class="tag pink">GRAPHIC DESIGNER</div>
+    <div class="tag pink">{{ targetJobTitle }}</div>
 </div>
 
 
@@ -30,8 +30,8 @@
 <div class="intro">
 
 <h1>
-CLAUDIA<br>
-ALVES
+{{ fullName.split(' ')[0] }}<br>
+{{ fullName.split(' ')[1:] | join(' ') }}
 </h1>
 
 
@@ -41,9 +41,7 @@ ABOUT ME
 
 
 <p>
-I’m a dedicated designer who loves creating clean,
-modern visuals. I enjoy learning new skills and
-exploring fresh ways to bring ideas to life.
+{{ professionalSummary | safe }}
 </p>
 
 
@@ -53,7 +51,7 @@ exploring fresh ways to bring ideas to life.
 
 <div class="photo">
 
-<img src="profile.jpg">
+<img src="{{ profileURL }}">
 
 </div>
 
@@ -69,7 +67,7 @@ exploring fresh ways to bring ideas to life.
 
 <div class="left">
 
-
+{% if education %}
 <div class="box">
 
 <div class="label">
@@ -79,43 +77,30 @@ EDUCATION HISTORY
 
 <div class="timeline">
 
-
+{% for edu in education %}
 <div class="item">
 
-<strong>2018 - 2021</strong>
+<strong>{{ edu.graduationTime }}</strong>
 
-<h4>Borcelle art School</h4>
+<h4>{{ edu.institution }}</h4>
 
 <ul>
-<li>Masters Degree of Visual Design</li>
+{% for detail in edu.details %}
+<li>{{ detail }}</li>
+{% endfor %}
 </ul>
 
 </div>
-
-
-<div class="item">
-
-<strong>2016 - 2018</strong>
-
-<h4>Hanover and Tyke Institute</h4>
-
-<ul>
-<li>Bachelor Degree Of Digital Marketing</li>
-</ul>
+{% endfor %}
 
 </div>
 
 
 </div>
+{% endif %}
 
 
-</div>
-
-
-
-
-
-
+{% if skillsAndTools %}
 <div class="box">
 
 <div class="label">
@@ -124,27 +109,16 @@ KEY SKILLS
 
 
 <ul>
-
-<li>Proficient in design softwares</li>
-
-<li>
-Strong understanding Of typography,
-color theory and layout design
-</li>
-
-<li>
-Ability to work collaboratively
-</li>
-
-<li>
-Good attention to detail
-</li>
-
-
+{% for skill_group in skillsAndTools %}
+    {% for skill in skill_group.detailedSkillsOrTools %}
+<li>{{ skill }}</li>
+    {% endfor %}
+{% endfor %}
 </ul>
 
 
 </div>
+{% endif %}
 
 
 </div>
@@ -155,7 +129,7 @@ Good attention to detail
 
 <div class="right">
 
-
+{% if experience %}
 <div class="box">
 
 
@@ -167,83 +141,26 @@ WORKING EXPERIENCE
 
 <div class="timeline">
 
-
+{% for exp in experience %}
 <div class="item">
 
 <h4>
-Rimberio
-<span>2023-2024</span>
+{{ exp.orgNameOrType }}
+<span>{{ exp.startTime }} - {{ exp.endTime }}</span>
 </h4>
 
 
 <ul>
 <li>
-Manage brand projects for various of businesses
+{{ exp.highlightContribution }}
 </li>
+{% for contrib in exp.contributions %}
+<li>{{ contrib }}</li>
+{% endfor %}
 </ul>
 
 </div>
-
-
-
-<div class="item">
-
-<h4>
-Thynk Unlimited
-<span>2022-2023</span>
-</h4>
-
-
-<ul>
-
-<li>
-Help Create brand Identities for Various of businesses
-</li>
-
-</ul>
-
-</div>
-
-
-
-<div class="item">
-
-<h4>
-Larana, Inc.
-<span>2021 - 2022</span>
-</h4>
-
-
-<ul>
-
-<li>
-Help Create brand Identities for Various of businesses
-</li>
-
-</ul>
-
-</div>
-
-
-
-<div class="item">
-
-<h4>
-Studio Shodwe
-<span>2018 - 2020</span>
-</h4>
-
-
-<ul>
-
-<li>
-Assist the creative lead in creating artistic direction of a brand.
-</li>
-
-</ul>
-
-
-</div>
+{% endfor %}
 
 
 </div>
@@ -251,6 +168,7 @@ Assist the creative lead in creating artistic direction of a brand.
 
 
 </div>
+{% endif %}
 
 
 </div>
@@ -270,20 +188,18 @@ Assist the creative lead in creating artistic direction of a brand.
 LET’S WORK AND CREATE TOGETHER!
 </div>
 
-
+{% for contact in contacts %}
 <div class="contact">
-hello@reallygreatsite.com
+{{ contact }}
 </div>
-
-
-<div class="contact">
-+123-456-7890
-</div>
+{% endfor %}
 
 
 </div>
 
-
+<div class="location">
+{{ location }}
+</div>
 
 </div>
 

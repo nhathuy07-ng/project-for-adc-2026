@@ -22,296 +22,124 @@
 
 <div class="profile">
 
-<img src="photo.jpg" alt="Profile">
+<img src="{{ profileURL }}" alt="Profile">
 
 </div>
 
 
-<h1>Your Name Here, Ph.D.</h1>
+<h1>{{ fullName }}</h1>
 
-
+{% if contacts %}
 <div class="contact">
-
-<span>✉ example@gmail.com</span>
-<span>◉ @overleaf_example</span>
-<span>↗ example</span>
-<span>🌐 example.example.org</span>
-
+{% for contact in contacts %}
+<span>{{ contact }}</span>
+{% endfor %}
 </div>
+{% endif %}
 
 
 </header>
 
-
-
+{% if experience %}
 <section>
 
 <h2>Employment History</h2>
 
-
+{% for exp in experience %}
 <div class="entry">
 
 <div class="year">
-2014 – · · · ·
+{{ exp.startTime }} – {{ exp.endTime }}
 </div>
 
 
 <div class="description">
 
-<strong>Community Witch</strong><br>
+<strong>{{ exp.jobTitle }}</strong><br>
 
-Village of Frying Pans.
+{{ exp.orgNameOrType }}{% if exp.address %},<br>
+{{ exp.address }}{% endif %}.
 
-</div>
-
-</div>
-
-
-
-<div class="entry">
-
-<div class="year">
-2013 – 2015
-</div>
-
-
-<div class="description">
-
-<strong>Lecturer</strong><br>
-
-Information Technology Department,<br>
-
-School of Engineering, Science and Technology,<br>
-
-XYZ College.
+{% if exp.contributions %}
+<br><br>
+<ul>
+{% for item in exp.contributions %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
+{% endif %}
 
 </div>
 
 </div>
-
+{% endfor %}
 
 </section>
+{% endif %}
 
 
-
-
-
+{% if education %}
 <section>
 
 <h2>Education</h2>
 
-
+{% for edu in education %}
 <div class="entry">
 
 <div class="year">
-2009 – 2013
+{{ edu.graduationTime }}
 </div>
 
 
 <div class="description">
 
-<strong>Ph.D., Unseen University</strong><br>
+<strong>{{ edu.institution }}</strong><br>
 
-High Energy Magic.
+{{ edu.location }}.
 
+{% if edu.details %}
 <br><br>
-
-Thesis title:
-
-Low-Cost Mana Generation in Under-Resourced Environments.
-
-</div>
-
-</div>
-
-
-
-
-<div class="entry">
-
-<div class="year">
-2003 – 2006
-</div>
-
-
-<div class="description">
-
-<strong>M.Sc. Computer Science</strong><br>
-
-Unseen University.
-
-<br><br>
-
-Thesis title:
-
-Applying ant algorithms in automatic design of novel magic charms.
+{% for detail in edu.details %}
+{{ detail }}<br>
+{% endfor %}
+{% endif %}
 
 </div>
 
 </div>
-
+{% endfor %}
 
 </section>
+{% endif %}
 
-
-
-
-
-<section>
-
-
-<h2>Research Publications</h2>
-
-
-<h3>Journal Articles</h3>
-
-
-<ol>
-
-<li>
-L. T. Lim, R. T. Chiew, E. K. Tang, A. G. Rusli,
-and Y. Naimah,
-“Digitising a machine-tractable version of Kamus Dewan with tei-p5,”
-PeerJ Preprints, vol. 4, e2205v1, 2016.
-</li>
-
-
-<li>
-F. Bond, L. T. Lim, E. K. Tang, and H. Riza,
-“The combined Wordnet Bahasa,”
-Nusa: Linguistic Studies of Languages,
-2014.
-</li>
-
-
-<li>
-L. T. Lim, L.-K. Soon, T. Y. Lim,
-E. K. Tang,
-“Lexicon+TX: Rapid construction of a multilingual lexicon,”
-Language Resources and Evaluation,
-2014.
-</li>
-
-
-</ol>
-
-
-
-<h3>Conference Proceedings</h3>
-
-
-<ol>
-
-
-<li>
-K. M. Boon and L. T. Lim,
-“An examination question paper preparation system,”
-International Conference on E-Learning Technologies,
-2014.
-</li>
-
-
-<li>
-L. T. Lim,
-“Context-dependent multilingual lexical lookup,”
-Association for Computational Linguistics,
-2013.
-</li>
-
-
-</ol>
-
-
-</section>
-
-
-
-
-
+{% if skillsAndTools %}
 <section>
 
 
 <h2>Skills</h2>
 
-
-
+{% for skill in skillsAndTools %}
 <div class="entry">
 
 <div class="year">
-Languages
+{{ skill.typeOfSkillsOrTools }}
 </div>
 
 
 <div class="description">
 
-Strong reading, writing and speaking competencies for English,
-Mandarin Chinese, Bahasa Malaysia.
+{{ skill.detailedSkillsOrTools | join(', ') }}
 
 </div>
 
 
 </div>
-
-
-
-
-
-<div class="entry">
-
-<div class="year">
-Coding
-</div>
-
-
-<div class="description">
-
-Java, PHP, Python, R, SQL, XML/XSL, LaTeX.
-
-</div>
-
-
-</div>
-
-
-
-
-
-<div class="entry">
-
-<div class="year">
-Databases
-</div>
-
-
-<div class="description">
-
-MySQL, PostgreSQL, HSQL, SQLite, LotusNotes.
-
-</div>
-
-
-</div>
-
-
-
-
-<div class="entry">
-
-<div class="year">
-Web Dev
-</div>
-
-
-<div class="description">
-
-HTML, CSS, JavaScript,
-Apache Web Server, Tomcat Web Server.
-
-</div>
-
-
-</div>
-
+{% endfor %}
 
 
 </section>
+{% endif %}
+
+</div>
+</body>
+</html>

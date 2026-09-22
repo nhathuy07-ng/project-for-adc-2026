@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dani Martinez CV</title>
+<title>{{ fullName }} CV</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -29,44 +29,35 @@
     <div class="identity">
 
         <h1>
-            Dani
-            <br>
-            Martinez
+            {{ fullName }}
         </h1>
 
         <p class="role">
-            UI / UX Designer
+            {{ targetJobTitle }}
         </p>
 
     </div>
 
 
     <div class="contact-row">
-
-        <div class="contact-item">
-            <span class="icon">☎</span>
-            <span>+123-456-7890</span>
-        </div>
-
-
-        <div class="contact-item">
-            <span class="icon">✉</span>
-            <span>hello@reallygreatsite.com</span>
-        </div>
-
-
+        {% if contacts %}
+            {% for contact in contacts %}
+            <div class="contact-item">
+                <span>{{ contact }}</span>
+            </div>
+            {% endfor %}
+        {% endif %}
+        
         <div class="contact-item">
             <span class="icon">◉</span>
-            <span>www.reallygreatsite.com</span>
+            <span>{{ profileURL }}</span>
         </div>
 
 
         <div class="contact-item">
             <span class="icon">●</span>
             <span>
-                123 Anywhere St., Any City,
-                <br>
-                ST 12345
+                {{ location }}
             </span>
         </div>
 
@@ -95,15 +86,7 @@
 <h2>ABOUT ME</h2>
 
 <p>
-Lorem ipsum dolor sit amet,
-consectetur adipiscing elit.
-Nullam pharetra in lorem at laoreet.
-Donec hendrerit libero eget est tempor,
-quis tempus arcu elementum.
-In elementum elit at dui tristique feugiat.
-Mauris convallis, mi at mattis malesuada,
-neque nulla volutpat dolor,
-hendrerit faucibus eros nibh ut nunc.
+{{ professionalSummary | safe }}
 </p>
 
 </section>
@@ -115,59 +98,23 @@ hendrerit faucibus eros nibh ut nunc.
 
 <h2>EDUCATION</h2>
 
-
+{% for edu in education %}
 <div class="edu">
 
 <strong>
-Course Studied
+{{ edu.institution }}
 </strong>
 
 <br>
 
-University/College Details
+{% for detail in edu.details %}
+{{ detail }}<br>
+{% endfor %}
 
-<br>
-
-2006 - 2008
-
-</div>
-
-
-
-<div class="edu">
-
-<strong>
-Course Studied
-</strong>
-
-<br>
-
-University/College Details
-
-<br>
-
-2006 - 2008
+{{ edu.graduationTime }}
 
 </div>
-
-
-
-<div class="edu">
-
-<strong>
-Course Studied
-</strong>
-
-<br>
-
-University/College Details
-
-<br>
-
-2006 - 2008
-
-</div>
-
+{% endfor %}
 
 </section>
 
@@ -179,24 +126,14 @@ University/College Details
 
 <h2>SKILLS</h2>
 
-
+{% for skill_group in skillsAndTools %}
+<h3>{{ skill_group.typeOfSkillsOrTools }}</h3>
 <ul>
-
-<li>UI / UX</li>
-
-<li>Visual Design</li>
-
-<li>Wireframes</li>
-
-<li>Storyboards</li>
-
-<li>User Flows</li>
-
-<li>Process Flows</li>
-
-
+{% for skill in skill_group.detailedSkillsOrTools %}
+<li>{{ skill }}</li>
+{% endfor %}
 </ul>
-
+{% endfor %}
 
 </section>
 
@@ -223,207 +160,39 @@ WORK EXPERIENCE
 </h2>
 
 
-
+{% for exp in experience %}
 <div class="experience">
 
 
 <div class="year">
-2019 - 2022
+{{ exp.startTime }} - {{ exp.endTime }}
 </div>
 
 
 <h3>
-Job position here
+{{ exp.jobTitle }}
 </h3>
 
 
 <strong>
-Company Name | Location
+{{ exp.orgNameOrType }} | {{ exp.address }}
 </strong>
 
 
 <p>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-Nullam pharetra in lorem at laoreet.
-Donec hendrerit libero eget est tempor,
-quis tempus arcu elementum.
-In elementum elit at dui tristique feugiat.
-Mauris convallis, mi at mattis malesuada,
-neque nulla volutpat dolor,
-hendrerit faucibus eros nibh ut nunc.
+{{ exp.highlightContribution }}
+<ul>
+{% for item in exp.contributions %}
+<li>{{ item }}</li>
+{% endfor %}
+</ul>
 </p>
 
 
 </div>
-
-
-
-
-
-<div class="experience">
-
-
-<div class="year">
-2017 - 2019
-</div>
-
-
-<h3>
-Job position here
-</h3>
-
-
-<strong>
-Company Name | Location
-</strong>
-
-
-<p>
-Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-Nullam pharetra in lorem at laoreet.
-Donec hendrerit libero eget est tempor,
-quis tempus arcu elementum.
-</p>
-
-
-</div>
-
-
-
-
-
-<div class="experience">
-
-
-<div class="year">
-2015 - 2017
-</div>
-
-
-<h3>
-Job position here
-</h3>
-
-
-<strong>
-Company Name | Location
-</strong>
-
-
-<p>
-Lorem ipsum dolor sit amet,
-consectetur adipiscing elit.
-Nullam pharetra in lorem at laoreet.
-</p>
-
-
-</div>
-
-
-
-
-
-
-<div class="experience">
-
-
-<div class="year">
-2013 - 2015
-</div>
-
-
-<h3>
-Job position here
-</h3>
-
-
-<strong>
-Company Name | Location
-</strong>
-
-
-<p>
-Lorem ipsum dolor sit amet,
-consectetur adipiscing elit.
-Nullam pharetra in lorem at laoreet.
-</p>
-
-
-</div>
-
+{% endfor %}
 
 </section>
-
-
-
-
-
-
-
-<section class="references">
-
-
-<h2 class="dark-title">
-REFERENCES
-</h2>
-
-
-
-<div class="reference-grid">
-
-
-<div>
-
-<h3>
-Harumi Kobayashi
-</h3>
-
-
-<strong>
-Wardiere Inc. / CEO
-</strong>
-
-
-<p>
-Phone: +123-456-7890
-<br>
-Email: hello@reallygreatsite.com
-</p>
-
-
-</div>
-
-
-
-
-<div>
-
-<h3>
-Bailey Dupont
-</h3>
-
-
-<strong>
-Wardiere Inc. / CEO
-</strong>
-
-
-<p>
-Phone: +123-456-7890
-<br>
-Email: hello@reallygreatsite.com
-</p>
-
-
-</div>
-
-
-
-</div>
-
-
-</section>
-
 
 </main>
 

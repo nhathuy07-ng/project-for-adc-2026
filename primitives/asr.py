@@ -30,7 +30,10 @@ def asr_loop():
             break
 
         file_path, job_id = item
-        result = pipe(file_path, return_timestamps=True)
+        result = pipe(file_path, return_timestamps=True, generate_kwargs={
+            "language": "english",
+            "task": "transcribe"
+        })
         transcripted_text = result['text']
 
         job_results[job_id] = transcripted_text.strip()

@@ -15,11 +15,10 @@
 
 <div class="header-left">
 
-<h1>FIRST NAME LAST NAME</h1>
+<h1>{{ fullName }}</h1>
 
 <p>
-(XXX) XXX-XXXX | ProfessionalEmail@gmail.com |
-linkedin.com/in | City, State
+{% for contact in contacts %}{{ contact }}{% if not loop.last %} | {% endif %}{% endfor %} | {{ location }}
 </p>
 
 </div>
@@ -31,21 +30,28 @@ LOGO
 
 </header>
 
+{% if professionalSummary %}
+<section>
+    <h2>PROFESSIONAL SUMMARY</h2>
+    <p>{{ professionalSummary | safe }}</p>
+</section>
+{% endif %}
 
+{% if education %}
 <section>
 
 <h2>EDUCATION</h2>
 
-
+{% for edu in education %}
 <div class="entry">
 
 <div class="line">
 <strong>
-Degree, Major (e.g Bachelor of Science, Communication Studies)
+{{ edu.institution }}
 </strong>
 
 <span>
-Graduating Month Year
+{{ edu.graduationTime }}
 </span>
 
 </div>
@@ -53,45 +59,45 @@ Graduating Month Year
 
 <div class="line">
 <span>
-Name of University, Institution
+{{ edu.degree }}
 </span>
 
 <span>
-City, State
+{{ edu.location }}
 </span>
 
 </div>
 
 
+{% if edu.details %}
 <p>
-Minor: XXXXX &nbsp;&nbsp; GPA x.x/4.0
+{% for detail in edu.details %}{{ detail }}{% if not loop.last %} &nbsp;&nbsp; {% endif %}{% endfor %}
 </p>
-
+{% endif %}
 
 </div>
-
+{% endfor %}
 
 </section>
+{% endif %}
 
-
-
-
+{% if experience %}
 <section>
 
 <h2>WORK EXPERIENCE</h2>
 
-
+{% for exp in experience %}
 <div class="entry">
 
 
 <div class="line">
 
 <strong>
-Position Title
+{{ exp.jobTitle }}
 </strong>
 
 <span>
-Month Year - Month Year
+{{ exp.startTime }} - {{ exp.endTime }}
 </span>
 
 </div>
@@ -100,223 +106,33 @@ Month Year - Month Year
 <div class="line">
 
 <span>
-Organization/Company Name
+{{ exp.orgNameOrType }}
 </span>
 
 <span>
-City, State
+{{ exp.address }}
 </span>
 
 </div>
 
 
 <ul>
-
-<li>
-Write your main highlighted accomplishments.
-</li>
-
-<li>
-Performed X by doing Y resulting in Z.
-</li>
-
-<li>
-Quantify achievements using numbers, percentages or data.
-</li>
-
+{% if exp.highlightContribution %}
+<li>{{ exp.highlightContribution }}</li>
+{% endif %}
+{% for contribution in exp.contributions %}
+<li>{{ contribution }}</li>
+{% endfor %}
 </ul>
 
 
 </div>
-
-
-
-<div class="entry">
-
-
-<div class="line">
-
-<strong>
-Position Title
-</strong>
-
-<span>
-Month Year - Month Year
-</span>
-
-</div>
-
-
-<div class="line">
-
-<span>
-Organization Name
-</span>
-
-<span>
-City, State
-</span>
-
-</div>
-
-
-<ul>
-
-<li>
-Highlight different skills and achievements.
-</li>
-
-<li>
-Show benefit and value added to the organization.
-</li>
-
-<li>
-Demonstrate teamwork, leadership and communication.
-</li>
-
-</ul>
-
-
-</div>
-
-
-
-
-<div class="entry">
-
-
-<div class="line">
-
-<strong>
-Position Title
-</strong>
-
-<span>
-Month Year - Month Year
-</span>
-
-</div>
-
-
-<div class="line">
-
-<span>
-Organization Name
-</span>
-
-<span>
-City, State
-</span>
-
-</div>
-
-
-<ul>
-
-<li>
-Include only relevant achievements.
-</li>
-
-<li>
-Use fewer bullet points for less relevant roles.
-</li>
-
-</ul>
-
-
-</div>
-
+{% endfor %}
 
 </section>
+{% endif %}
 
-
-
-
-
-<section>
-
-<h2>SECTION HEADER</h2>
-
-
-<div class="entry">
-
-
-<div class="line">
-
-<strong>
-Title
-</strong>
-
-<span>
-Month Year - Month Year
-</span>
-
-</div>
-
-
-<div class="line">
-
-<span>
-Organization Name, Institution Name
-</span>
-
-<span>
-City, State
-</span>
-
-</div>
-
-
-<ul>
-
-<li>
-Campus organization, class project or volunteer experience.
-</li>
-
-<li>
-Highlight leadership, teamwork and technical skills.
-</li>
-
-</ul>
-
-
-</div>
-
-
-</section>
-
-
-
-
-
-
-<section>
-
-<h2>CERTIFICATIONS</h2>
-
-
-<p>
-<strong>CPR Certification</strong>,
-American Red Cross
-<br>
-Expires Month Year
-</p>
-
-
-<p>
-<strong>Google UX Design Certificate</strong>,
-Coursera
-<br>
-Issued Month Year
-</p>
-
-
-</section>
-
-
-
-
-
+{% if skillsAndTools %}
 <section>
 
 <h2>TECHNICAL SKILLS</h2>
@@ -324,38 +140,21 @@ Issued Month Year
 
 <div class="skill-grid">
 
-
+{% for skill_group in skillsAndTools %}
 <div>
 <ul>
-<li>Microsoft Word</li>
-<li>Microsoft Excel</li>
-<li>Microsoft PowerPoint</li>
+{% for skill in skill_group.detailedSkillsOrTools %}
+<li>{{ skill }}</li>
+{% endfor %}
 </ul>
 </div>
-
-
-<div>
-<ul>
-<li>Project Management</li>
-<li>Hubspot</li>
-<li>Smartsheet</li>
-</ul>
-</div>
-
-
-<div>
-<ul>
-<li>Email Marketing</li>
-<li>Asana</li>
-<li>Java</li>
-</ul>
-</div>
-
+{% endfor %}
 
 </div>
 
 
 </section>
+{% endif %}
 
 
 </div>

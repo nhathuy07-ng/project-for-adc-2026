@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Alice Adventurer CV</title>
+<title>{{ fullName }} CV</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -26,11 +26,11 @@
 <div class="profile-header">
 
 <h1>
-Alice
+{{ fullName }}
 </h1>
 
 <h2>
-Adventurer
+{{ targetJobTitle }}
 </h2>
 
 </div>
@@ -38,17 +38,9 @@ Adventurer
 
 
 <div class="contact-section">
-
-<p>🇬🇧 United Kingdom</p>
-
-<p>☎ +39 0325658974</p>
-
-<p>🌐 http://en.wikipedia.org</p>
-
-<p>✉ alice@wonderland.com</p>
-
-<p>🔗 alicewonderland</p>
-
+{% for contact in contacts %}
+<p>{{ contact }}</p>
+{% endfor %}
 </div>
 
 
@@ -63,20 +55,7 @@ Profile
 
 
 <p>
-Lorem ipsum dolor sit amet,
-consectetur adipiscing elit.
-In imperdiet, lectus et
-porttitor pretium, dui enim
-tempus leo, nec cursus velit
-velit id massa.
-</p>
-
-<p>
-Quisque elementum erat mi,
-vel vehicula nunc fringilla
-eget. Mauris at sem ante.
-Integer in dui sed libero
-scelerisque lobortis.
+{{ professionalSummary | safe }}
 </p>
 
 
@@ -86,52 +65,22 @@ scelerisque lobortis.
 
 
 
-<section class="side-section">
-
-<h3>
-Other Interest
-</h3>
-
-
-<p>
-The heroine and the dreamer
-of Wonderland. Alice is the
-principal character.
-</p>
-
-
-</section>
-
-
-
-
-
+{% if skillsAndTools %}
 <section class="side-section">
 
 <h3>
 Skills
 </h3>
 
-
+{% for category in skillsAndTools %}
 <ul>
-
+{% for skill in category.detailedSkillsOrTools %}
 <li>
-Polite
+{{ skill }}
 </li>
-
-
-<li>
-Pursuer of rabbits
-</li>
-
-
-<li>
-Creative
-</li>
-
-
+{% endfor %}
 </ul>
-
+{% endfor %}
 
 <div class="skill-scale">
 
@@ -146,6 +95,9 @@ Creative
 
 
 </section>
+{% endif %}
+
+
 
 
 
@@ -167,6 +119,7 @@ Creative
 
 
 
+{% if experience %}
 <section>
 
 <h2 class="section-title">
@@ -178,15 +131,15 @@ Experience
 <div class="timeline">
 
 
-
+{% for exp in experience %}
 <div class="timeline-item">
 
 
 <div class="time">
 
-Sep/2015
+{{ exp.startTime }}
 <br>
-Present
+{{ exp.endTime }}
 
 </div>
 
@@ -200,29 +153,16 @@ Present
 
 
 <h3>
-Present Job 4 Employer, Country/City
+{{ exp.jobTitle }} {{ exp.orgNameOrType }}, {{ exp.address }}
 </h3>
 
 
 <ul>
-
+{% for contribution in exp.contributions %}
 <li>
-Try use S.M.A.R.T. method to describe your role.
+{{ contribution }}
 </li>
-
-<li>
-Sed lobortis dolor vel orci facilisis,
-at consequat libero tincidunt.
-Praesent eu mi non mi ullamcorper.
-</li>
-
-
-<li>
-Nullam at maximus purus,
-sit amet vehicula turpis.
-</li>
-
-
+{% endfor %}
 </ul>
 
 
@@ -231,165 +171,7 @@ sit amet vehicula turpis.
 
 
 </div>
-
-
-
-
-
-
-
-<div class="timeline-item">
-
-
-<div class="time">
-
-Feb/2009
-<br>
-Jun/2015
-
-</div>
-
-
-
-<div class="circle"></div>
-
-
-
-<div class="description">
-
-
-<h3>
-Job 3 Employer, Country/City
-</h3>
-
-
-<ul>
-
-<li>
-Sed lobortis dolor vel orci facilisis,
-at consequat libero tincidunt.
-</li>
-
-
-<li>
-Praesent eu mi non mi ullamcorper
-fringilla vitae.
-</li>
-
-
-</ul>
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="timeline-item">
-
-
-<div class="time">
-
-Feb/2009
-<br>
-Jun/2015
-
-</div>
-
-
-
-<div class="circle"></div>
-
-
-
-<div class="description">
-
-
-<h3>
-Job 2 Employer, Country/City
-</h3>
-
-
-<ul>
-
-<li>
-Sed lobortis dolor vel orci facilisis.
-</li>
-
-
-<li>
-Nullam at maximus purus.
-</li>
-
-
-</ul>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-
-
-
-<div class="timeline-item">
-
-
-<div class="time">
-
-Jun/2003
-<br>
-Feb/2009
-
-</div>
-
-
-
-<div class="circle"></div>
-
-
-
-<div class="description">
-
-
-<h3>
-Job 1 Employer, Country/City
-</h3>
-
-
-<ul>
-
-<li>
-Sed lobortis dolor vel orci facilisis.
-</li>
-
-
-<li>
-Praesent eu mi non mi ullamcorper.
-</li>
-
-
-</ul>
-
-
-
-</div>
-
-
-</div>
+{% endfor %}
 
 
 
@@ -397,6 +179,7 @@ Praesent eu mi non mi ullamcorper.
 
 
 </section>
+{% endif %}
 
 
 
@@ -404,6 +187,7 @@ Praesent eu mi non mi ullamcorper.
 
 
 
+{% if education %}
 <section>
 
 
@@ -418,14 +202,13 @@ Education
 
 
 
+{% for edu in education %}
 <div class="timeline-item">
 
 
 <div class="time">
 
-Aug/2018
-<br>
-Present
+{{ edu.graduationTime }}
 
 </div>
 
@@ -439,15 +222,14 @@ Present
 
 
 <h3>
-Ph.D. Field University
+{{ edu.institution }}
 </h3>
 
 
 <p>
-Integer rutrum vitae urna
-tincidunt lacinia.
-Duis aliquet massa vestibulum,
-sollicitudin est vel.
+{% for detail in edu.details %}
+{{ detail }}<br>
+{% endfor %}
 </p>
 
 
@@ -456,92 +238,7 @@ sollicitudin est vel.
 
 
 </div>
-
-
-
-
-
-
-
-<div class="timeline-item">
-
-
-<div class="time">
-
-Aug/2016
-<br>
-Jul/2018
-
-</div>
-
-
-
-<div class="circle"></div>
-
-
-
-<div class="description">
-
-
-<h3>
-M.Sc. Field University
-</h3>
-
-
-<p>
-Integer rutrum vitae urna
-tincidunt lacinia.
-</p>
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-<div class="timeline-item">
-
-
-<div class="time">
-
-Aug/2010
-<br>
-Jul/2010
-
-</div>
-
-
-
-<div class="circle"></div>
-
-
-
-<div class="description">
-
-
-<h3>
-B.Sc. Field University
-</h3>
-
-
-<p>
-Integer rutrum vitae urna
-tincidunt lacinia.
-</p>
-
-
-</div>
-
-
-
-</div>
+{% endfor %}
 
 
 
@@ -549,50 +246,7 @@ tincidunt lacinia.
 
 
 </section>
-
-
-
-
-
-
-
-<section>
-
-<h2 class="section-title">
-Awards
-</h2>
-
-
-<div class="award">
-
-<strong>
-1987 - 1998
-</strong>
-
-<p>
-All-Time Best Fantasy Novel before 1990.
-</p>
-
-
-</div>
-
-
-
-<div class="award">
-
-<strong>
-1987
-</strong>
-
-<p>
-All-Time Best Fantasy Novel.
-</p>
-
-
-</div>
-
-
-</section>
+{% endif %}
 
 
 
