@@ -47,8 +47,9 @@ class SessionData:
         self.interactionMode: InteractionMode = None
         self.currentStep: int = 0
         self.resumeInfo = ResumeInfo()
-        self.state = "ASKING" # ASKING or WAITING_FOR_CONFIRM
+        self.state = "ASKING" # ASKING, WAITING_FOR_CONFIRM, or FINAL_REVIEW
         self.last_transcript = ""
+        self.answers = []
 
 session_data = SessionData()
 
@@ -72,6 +73,7 @@ async def websocket_endpoint(websocket: WebSocket):
             if message.get("action") == "start":
                 session_data.currentStep = 0
                 session_data.state = "ASKING"
+                session_data.answers = []
                 current_prompt = step_prompts[session_data.currentStep]
                 audio_b64 = get_tts_base64(current_prompt)
                 
@@ -113,10 +115,6 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Process answer
                     session_data.last_transcript = transcript
                     
-                    # (Optional) We could call query_ai(transcript, session_data.resumeInfo) here 
-                    # to update the internal state, but for the readback we use the transcript.
-                    # llm_parsed_json = query_ai(transcript, session_data.resumeInfo)
-                    
                     readback = f"I noted down: {transcript}. If this is the right information, say 'continue.' Else, tell me what to change."
                     session_data.state = "WAITING_FOR_CONFIRM"
                     audio_b64 = get_tts_base64(readback)
@@ -129,21 +127,36 @@ async def websocket_endpoint(websocket: WebSocket):
                     
                 elif session_data.state == "WAITING_FOR_CONFIRM":
                     if "continue" in transcript.lower():
-                        # Proceed to next question
-                        confirmation_text = "Got it, moving to the next question."
+                        # Save the final confirmed answer for this step
+                        session_data.answers.append(session_data.last_transcript)
+                        
                         if session_data.currentStep < len(step_prompts) - 1:
+                            # Proceed to next question
+                            confirmation_text = "Got it, moving to the next question."
                             session_data.currentStep += 1
-                        session_data.state = "ASKING"
-                        
-                        next_prompt = step_prompts[session_data.currentStep]
-                        combined_text = f"{confirmation_text} {next_prompt}"
-                        
-                        audio_b64 = get_tts_base64(combined_text)
-                        await websocket.send_text(json.dumps({
-                            "type": "audio",
-                            "text": combined_text,
-                            "audio_data": audio_b64
-                        }))
+                            session_data.state = "ASKING"
+                            
+                            next_prompt = step_prompts[session_data.currentStep]
+                            combined_text = f"{confirmation_text} {next_prompt}"
+                            
+                            audio_b64 = get_tts_base64(combined_text)
+                            await websocket.send_text(json.dumps({
+                                "type": "audio",
+                                "text": combined_text,
+                                "audio_data": audio_b64
+                            }))
+                        else:
+                            # Final readback
+                            session_data.state = "FINAL_REVIEW"
+                            full_cv = " ".join(session_data.answers)
+                            final_text = f"Got it. We have finished all the questions. Here is your full CV so far: {full_cv}. Does everything sound complete, or would you like to make any changes?"
+                            audio_b64 = get_tts_base64(final_text)
+                            
+                            await websocket.send_text(json.dumps({
+                                "type": "audio",
+                                "text": final_text,
+                                "audio_data": audio_b64
+                            }))
                     else:
                         # Handle amendment
                         session_data.last_transcript += " " + transcript
@@ -153,6 +166,30 @@ async def websocket_endpoint(websocket: WebSocket):
                         await websocket.send_text(json.dumps({
                             "type": "audio",
                             "text": readback,
+                            "audio_data": audio_b64
+                        }))
+                        
+                elif session_data.state == "FINAL_REVIEW":
+                    # Simple confirmation logic for the final CV
+                    if any(word in transcript.lower() for word in ["good", "yes", "perfect", "continue", "done"]):
+                        final_msg = "Great! Your CV is now ready for export."
+                        session_data.state = "DONE"
+                        audio_b64 = get_tts_base64(final_msg)
+                        
+                        await websocket.send_text(json.dumps({
+                            "type": "audio",
+                            "text": final_msg,
+                            "audio_data": audio_b64
+                        }))
+                    else:
+                        # User wants a change to the overall CV
+                        session_data.answers.append(f"(Amendment: {transcript})")
+                        msg = "I have noted that change. Does the rest of the CV look good now?"
+                        audio_b64 = get_tts_base64(msg)
+                        
+                        await websocket.send_text(json.dumps({
+                            "type": "audio",
+                            "text": msg,
                             "audio_data": audio_b64
                         }))
                         
