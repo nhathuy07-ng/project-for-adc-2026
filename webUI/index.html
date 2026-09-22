@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice CV Creator</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Voice-operated CV Builder</h1>
+    </header>
+    
+    <main>
+        <section id="status-region" aria-live="polite" class="status-box">
+            System is ready. Press Start or Spacebar to begin.
+        </section>
+
+        <section id="transcript-region" aria-live="assertive" class="transcript-box">
+            <!-- Transcript appears here -->
+        </section>
+
+        <section class="controls">
+            <button id="start-btn" aria-label="Start Interview">Start (Space)</button>
+            <button id="record-btn" aria-label="Start or Stop Recording">Record (F or J)</button>
+            <button id="next-btn" aria-label="Next Step">Next Step</button>
+        </section>
+    </main>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

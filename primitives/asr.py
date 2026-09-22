@@ -11,6 +11,11 @@ job_results: dict[str, str] = {}
 def gen_job_id():
     return str(time.time_ns())
 
+def start_asr_job(input_str: str):
+    job_id = gen_job_id()
+    job_queue.put((input_str, job_id))
+    return job_id
+
 def wait_asr_result(job_id: str):
     while job_id not in job_results:
         time.sleep(0.02)
@@ -40,7 +45,7 @@ if __name__ == "__main__":
         while True:
             job_queue.put([input(), str(time.time())])
             job_queue.join()
-            
+
     except KeyboardInterrupt:
         # Graceful shutdown: send sentinel
         job_queue.put(None)

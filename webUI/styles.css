@@ -1,0 +1,64 @@
+:root {
+    --bg-color: #121212;
+    --text-color: #ffffff;
+    --accent-color: #ffeb3b; /* High contrast yellow for visibility */
+    --button-bg: #333333;
+    --button-hover: #444444;
+    --border-color: #ffffff;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 2rem;
+    font-size: 1.2rem; /* Scalable typography, good for visually impaired */
+    line-height: 1.6;
+}
+
+h1 {
+    font-size: 2.5rem;
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 0.5rem;
+}
+
+.status-box, .transcript-box {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1.5rem;
+    min-height: 100px;
+}
+
+.transcript-box {
+    border-color: var(--accent-color);
+}
+
+.controls {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+button {
+    background-color: var(--button-bg);
+    color: var(--text-color);
+    border: 2px solid var(--border-color);
+    padding: 1rem 2rem;
+    font-size: 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    min-width: 44px;
+    min-height: 44px; /* WCAG 2.2 Target Size minimum */
+}
+
+button:hover {
+    background-color: var(--button-hover);
+}
+
+button:focus-visible {
+    outline: 4px solid var(--accent-color);
+    outline-offset: 4px; /* High contrast focus state */
+}

@@ -1,14 +1,18 @@
+# Project
+
+Voice-operated CV creation for people with visual impairment.
+
 # User flow
 
 0. Welcomes the user. Ask them basic pref questions:
-    1. *"Are you planning to create a CV, or a portfolio?"* -> "<CV|Portfolio>, got it."
-    2. *"Would you like to build your CV step-by-step through a guided voice interview, or simply speak out your raw notes for me to structure and polish?"*
+    1. *"Would you like to build your CV step-by-step through a guided voice interview, or simply speak out your raw notes for me to structure and polish?"*
 
 --> Saves this to `PROFILE_TYPE` and `INTERACTION_MODE`
 
 ## CV creation (guided voice interview)
 
 ### Questions:
+
 1. Basic info: "Tell me your full name, location, contact details, and the job title you're targeting."
 
 2. Profile links: "Do you have a LinkedIn handle, GitHub username or portfolio link you’d like to include?"
@@ -19,7 +23,7 @@
 
 5. Education & Formal Training: "What is your educational background? Mention your degree or field of study, school or training program, and graduation year—or let me know if you are self-taught or currently studying."
 
-6. Skills and Tools: "What tools, technologies, software, or domain expertise do you use most often in your day-to-day work?"
+6. Skills and Tools: "What tools and specialized skills do you use most in your day-to-day work?"
 
 7. Projects & Certifications: "Are there any standout projects, licenses, or certifications you’d like to highlight?"
 
@@ -37,17 +41,15 @@
 
 ### Export
 
-1. Describe CV style (focusing on layout).
-1. Currently, only two CV style.
+1. System quickly describes each CV style (focusing on layout) to the user.
+2. User pick with voices.
 
 ## CV creation (raw notes)
 
 1. User input raw notes.
 2. AI asks to clarify if any
-3. When done, AI reads back the portfolio.
+3. When done, AI reads back the CV.
 4. User makes amendment.
 5. System reads back what's changed.
 6. Loop until user's statisfied. If nothing changes, system will ask if it needs reading back once more.
 
-
-## Portfolio creation: Later on
