@@ -1,7 +1,9 @@
 # ignore vibeasr-build
 
 vibeasr-build/
-
+vibeasr_bin/
+nemo-speech/
+models/
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

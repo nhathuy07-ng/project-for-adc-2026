@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Harvard CV Template</title>
+  <style>
+    /* Reset & Page Setup */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Times New Roman", Times, Georgia, serif;
+      font-size: 11pt;
+      line-height: 1.25;
+      color: #000;
+      background-color: #e5e5e5;
+      display: flex;
+      justify-content: center;
+      padding: 20px 0;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Standard 8.5" x 11" Paper Dimensions */
+    .sheet {
+      background: #ffffff;
+      width: 8.5in;
+      min-height: 11in;
+      padding: 0.65in 0.75in;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 11pt;
+    }
+
+    .name {
+      font-size: 14pt;
+      font-weight: bold;
+      margin-bottom: 3pt;
+      text-transform: none;
+    }
+
+    .contact-line {
+      font-size: 10.5pt;
+    }
+
+    .bullet-separator {
+      margin: 0 6px;
+      font-size: 9pt;
+      vertical-align: middle;
+    }
+
+    /* Section Headings */
+    h2.section-header {
+      font-size: 11pt;
+      font-weight: bold;
+      text-transform: capitalize;
+      border-bottom: 1px solid #000;
+      padding-bottom: 1.5pt;
+      margin-top: 10pt;
+      margin-bottom: 5pt;
+    }
+
+    /* Flex row for organization/role and location/date */
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      width: 100%;
+    }
+
+    .bold-upper {
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .bold {
+      font-weight: bold;
+    }
+
+    .italic {
+      font-style: italic;
+    }
+
+    .right-col {
+      text-align: right;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .entry {
+      margin-bottom: 6pt;
+    }
+
+    .entry:last-child {
+      margin-bottom: 0;
+    }
+
+    /* Text details and bullets */
+    p.description {
+      margin-top: 2pt;
+      margin-bottom: 2pt;
+      text-align: justify;
+    }
+
+    ul.bullet-list {
+      list-style-type: disc;
+      padding-left: 20px;
+      margin-top: 2pt;
+      margin-bottom: 4pt;
+    }
+
+    ul.bullet-list li {
+      margin-bottom: 1.5pt;
+      text-align: justify;
+    }
+
+    /* Skills category lines */
+    .skills-block p {
+      margin-bottom: 2.5pt;
+      text-align: justify;
+    }
+
+    .label {
+      font-weight: bold;
+    }
+
+    /* Strict 1-to-1 Media Print Stylesheet */
+    @media print {
+      @page {
+        size: letter portrait;
+        margin: 0.65in 0.75in;
+      }
+
+      html, body {
+        background: transparent !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        height: 100% !important;
+      }
+
+      .sheet {
+        box-shadow: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        width: 100% !important;
+        min-height: auto !important;
+      }
+
+      .entry, .section-header {
+        page-break-inside: avoid;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <main class="sheet">
+    <!-- HEADER -->
+    <header>
+      <div class="name">Your Name</div>
+      <div class="contact-line">
+        Home Street Address City, State Zip name@college.harvard.edu <span class="bullet-separator">&#9679;</span> phone number
+      </div>
+    </header>
+
+    <!-- EDUCATION -->
+    <section>
+      <h2 class="section-header">Education</h2>
+
+      <div class="entry">
+        <div class="row">
+          <span class="bold-upper">HARVARD UNIVERSITY</span>
+          <span class="right-col">Cambridge, MA</span>
+        </div>
+        <div class="row">
+          <span>Degree, Concentration. GPA [Note: Optional]</span>
+          <span class="right-col">Graduation Date</span>
+        </div>
+        <div>Thesis [Note: Optional]</div>
+        <div>Relevant Coursework: [Note: Optional. Awards and honors can also be listed here.]</div>
+      </div>
+
+      <div class="entry">
+        <div class="row">
+          <span class="bold-upper">STUDY ABROAD <span style="font-weight: normal; text-transform: none;">[Note: If Applicable]</span></span>
+          <span class="right-col">City, Country</span>
+        </div>
+        <div class="row">
+          <span>Study abroad coursework in</span>
+          <span class="right-col">Month Year - Month Year</span>
+        </div>
+      </div>
+
+      <div class="entry">
+        <div class="row">
+          <span class="bold-upper">NAME OF HIGH SCHOOL</span>
+          <span class="right-col">City, State</span>
+        </div>
+        <div class="row">
+          <span>[Note: May include GPA, SAT scores, or academic honors an employer may want to know]</span>
+          <span class="right-col">Graduation Date</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- EXPERIENCE -->
+    <section>
+      <h2 class="section-header">Experience</h2>
+
+      <div class="entry">
+        <div class="row">
+          <span class="bold-upper">ORGANIZATION</span>
+          <span class="right-col">City, State</span>
+        </div>
+        <div class="row">
+          <span class="italic">Position Title</span>
+          <span class="right-col">Month Year - Month Year</span>
+        </div>
+        <p class="description">
+          Beginning with your most recent position, describe your experience, skills, and resulting outcomes in bullet or paragraph form.
+        </p>
+        <ul class="bullet-list">
+          <li>Begin each line with an action verb and include details that will help the reader understand your accomplishments, skills, knowledge, abilities, or achievements.</li>
+          <li>Quantify where possible.</li>
+          <li>Do not use personal pronouns; each line should be a phrase rather than full sentence.</li>
+        </ul>
+      </div>
+
+      <div class="entry">
+        <div class="row">
+          <span class="bold-upper">ORGANIZATION</span>
+          <span class="right-col">City, State</span>
+        </div>
+        <div class="row">
+          <span class="italic">Position Title</span>
+          <span class="right-col">Month Year - Month Year</span>
+        </div>
+        <p class="description">
+          With your next-most recent position, describe your experience, skills, and resulting outcomes in bullet or paragraph form.
+        </p>
+        <ul class="bullet-list">
+          <li>Begin each line with an action verb and include details that will help the reader understand your accomplishments, skills, knowledge, abilities, or achievements.</li>
+          <li>Quantify where possible.</li>
+          <li>Do not use personal pronouns; each line should be a phrase rather than full sentence.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- LEADERSHIP AND ACTIVITIES -->
+    <section>
+      <h2 class="section-header">Leadership and Activities</h2>
+
+      <div class="entry">
+        <div class="row">
+          <span class="bold-upper">ORGANIZATION</span>
+          <span class="right-col">City, State</span>
+        </div>
+        <div class="row">
+          <span class="italic">Role</span>
+          <span class="right-col">Month Year - Month Year</span>
+        </div>
+        <ul class="bullet-list">
+          <li>This section can be formatted similarly to the Experience section, or you can omit descriptions for activities.</li>
+          <li>If this section is more relevant to the opportunity you are applying for, consider moving this above your Experience section.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- SKILLS & INTERESTS -->
+    <section>
+      <h2 class="section-header">Skills &amp; Interests [Note: Optional]</h2>
+      <div class="skills-block">
+        <p><span class="label">Technical:</span> List computer software and programming languages</p>
+        <p><span class="label">Language:</span> List foreign languages and your level of fluency</p>
+        <p><span class="label">Laboratory:</span> List scientific / research lab techniques or tools [If Applicable]</p>
+        <p><span class="label">Interests:</span> List activities you enjoy that may spark interview conversation</p>
+      </div>
+    </section>
+  </main>
+
+</body>
+</html>
