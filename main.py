@@ -43,9 +43,88 @@ class InteractionMode(enum.Enum):
 
 from pydantic import BaseModel, Field
 
+class FirstStepIntent(BaseModel):
+    intent: str = Field(description="Must be exactly one of: 'STEP_BY_STEP', 'RAW_NOTES', 'OTHER'. Use STEP_BY_STEP if the user wants a guided interview. Use RAW_NOTES if they want to speak raw notes.")
+
 class UserIntent(BaseModel):
-    intent: str = Field(description="Must be exactly one of: 'PROVIDE_INFO', 'CONFIRM', 'EXIT'. Use PROVIDE_INFO if the user is giving resume details or amending previous details. Use CONFIRM if they are saying 'continue', 'yes', 'looks good'. Use EXIT if they want to stop or quit.")
+    intent: str = Field(description="Must be exactly one of: 'PROVIDE_INFO', 'CONFIRM', 'EXIT', 'OTHER'. Use PROVIDE_INFO if the user is giving resume details or amending previous details. Use CONFIRM if the user explicitly says 'continue', 'yes', 'perfect', or 'looks good'. Use EXIT if they want to stop or quit. Use OTHER if none fit.")
     summary_of_provided_info: str = Field(default="", description="If intent is PROVIDE_INFO, summarize what the user just provided in 1 short sentence (e.g., 'I noted down your email as bob@email.com').")
+
+import re
+
+def humanize_key(key):
+    s = re.sub('([A-Z])', r' \1', key).strip()
+    return s.capitalize()
+
+def diff_dict(old_v, new_v):
+    if old_v == new_v:
+        return None
+    if isinstance(new_v, dict):
+        old_dict = old_v if isinstance(old_v, dict) else {}
+        changes = {}
+        for k, v in new_v.items():
+            cdiff = diff_dict(old_dict.get(k), v)
+            if cdiff is not None:
+                changes[k] = cdiff
+        return changes if changes else None
+    elif isinstance(new_v, list):
+        old_list = old_v if isinstance(old_v, list) else []
+        if not new_v:
+            return None
+        if isinstance(new_v[0], dict):
+            changes = []
+            for idx, item in enumerate(new_v):
+                old_item = old_list[idx] if idx < len(old_list) else {}
+                cdiff = diff_dict(old_item, item)
+                if cdiff is not None:
+                    name = item.get("jobTitle") or item.get("institution") or item.get("typeOfSkillsOrTools") or f"item {idx+1}"
+                    changes.append({"_name": name, "_diff": cdiff})
+            return changes if changes else None
+        else:
+            if new_v != old_list:
+                return new_v
+            return None
+    else:
+        if new_v:
+            return new_v
+        return None
+
+def render_diff(diff):
+    lines = []
+    if isinstance(diff, dict):
+        for k, v in diff.items():
+            key_name = humanize_key(k)
+            if isinstance(v, (dict, list)):
+                lines.append(f"{key_name}:")
+                child_text = render_diff(v)
+                if child_text:
+                    lines.append(child_text)
+            else:
+                lines.append(f"{key_name}: {v}.")
+    elif isinstance(diff, list):
+        if len(diff) > 0 and isinstance(diff[0], dict) and "_name" in diff[0]:
+            for item in diff:
+                lines.append(f"{item['_name']}:")
+                child_text = render_diff(item['_diff'])
+                if child_text:
+                    lines.append(child_text)
+        else:
+            lines.append(f"{', '.join(str(x) for x in diff)}.")
+    else:
+        lines.append(f"{diff}.")
+    
+    return " ".join(lines)
+
+def generate_readback(old_resume: ResumeInfo, new_resume: ResumeInfo) -> str:
+    old_dict = old_resume.model_dump(exclude_none=True, exclude_defaults=True)
+    new_dict = new_resume.model_dump(exclude_none=True, exclude_defaults=True)
+    
+    diff_tree = diff_dict(old_dict, new_dict)
+    if not diff_tree:
+        return "I didn't catch any new information."
+        
+    readback_text = render_diff(diff_tree)
+    return "I recorded the following: " + readback_text
 
 class SessionData:
     def __init__(self):
@@ -159,15 +238,59 @@ async def websocket_endpoint(websocket: WebSocket):
                 
                 if session_data.state in ["ASKING", "WAITING_FOR_CONFIRM"]:
                     print("Classifying intent...")
-                    intent_json_str = query_ai(transcript, UserIntent)
-                    try:
-                        user_intent = UserIntent.model_validate_json(intent_json_str)
-                    except Exception as e:
-                        print("Failed to parse intent:", e)
-                        user_intent = UserIntent(intent="PROVIDE_INFO", summary_of_provided_info=transcript)
+                    if session_data.currentStep == 0 and session_data.state == "ASKING":
+                        try:
+                            first_intent = needle.extract(transcript, schema=FirstStepIntent)
+                            intent_val = first_intent.intent if first_intent else "OTHER"
+                        except:
+                            intent_val = "OTHER"
+                            
+                        if intent_val == "STEP_BY_STEP":
+                            session_data.interactionMode = InteractionMode.GUIDED
+                            session_data.currentStep = 1
+                            next_prompt = step_prompts[session_data.currentStep]
+                            combined_text = f"Great, we will go step by step. {next_prompt}"
+                            audio_b64 = get_tts_base64(combined_text)
+                            await websocket.send_text(json.dumps({
+                                "type": "audio", "text": combined_text, "audio_data": audio_b64
+                            }))
+                            continue
+                        elif intent_val == "RAW_NOTES":
+                            session_data.interactionMode = InteractionMode.SCRIBE
+                            msg = "Scribe mode is not fully implemented yet. Let's just do step by step for now. " + step_prompts[1]
+                            session_data.currentStep = 1
+                            audio_b64 = get_tts_base64(msg)
+                            await websocket.send_text(json.dumps({
+                                "type": "audio", "text": msg, "audio_data": audio_b64
+                            }))
+                            continue
+                        else:
+                            msg = "I didn't quite catch that. Would you like to go step by step, or speak raw notes?"
+                            audio_b64 = get_tts_base64(msg)
+                            await websocket.send_text(json.dumps({
+                                "type": "audio", "text": msg, "audio_data": audio_b64
+                            }))
+                            continue
+                    else:
+                        clean_t = ''.join(c for c in transcript.lower() if c.isalnum() or c.isspace()).strip()
+                        if clean_t in ["continue", "yes", "perfect", "looks good", "yep", "sure"]:
+                            user_intent = UserIntent(intent="CONFIRM", summary_of_provided_info="")
+                        else:
+                            try:
+                                user_intent = needle.extract(transcript, schema=UserIntent)
+                                if user_intent is None or user_intent.intent == "OTHER":
+                                    raise ValueError("Fallback to LLM")
+                            except Exception as e:
+                                print("Needle failed or returned OTHER, falling back to LLM:", e)
+                                try:
+                                    intent_json_str = query_ai(transcript, UserIntent)
+                                    user_intent = UserIntent.model_validate_json(intent_json_str)
+                                except Exception as e2:
+                                    print("LLM fallback failed:", e2)
+                                    user_intent = UserIntent(intent="PROVIDE_INFO", summary_of_provided_info=transcript)
+                                
+                        print(f"Intent classified as: {user_intent.intent}")
                         
-                    print(f"Intent classified as: {user_intent.intent}")
-                    
                     if user_intent.intent == "EXIT":
                         session_data.previous_state = session_data.state
                         session_data.state = "CONFIRM_EXIT"
@@ -190,7 +313,8 @@ async def websocket_endpoint(websocket: WebSocket):
                                 }))
                             else:
                                 session_data.state = "FINAL_REVIEW"
-                                final_text = "Got it. We have finished all the questions. Is there anything else you want to amend before we choose a design?"
+                                full_cv = generate_readback(ResumeInfo(), session_data.resumeInfo)
+                                final_text = f"Got it. We have finished all the questions. Here is your full CV so far. {full_cv} Is there anything else you want to amend before we choose a design?"
                                 audio_b64 = get_tts_base64(final_text)
                                 await websocket.send_text(json.dumps({
                                     "type": "audio", "text": final_text, "audio_data": audio_b64
@@ -201,14 +325,20 @@ async def websocket_endpoint(websocket: WebSocket):
                             
                     elif user_intent.intent == "PROVIDE_INFO":
                         print("Structuring data...")
-                        prompt_input = f"Current JSON: {session_data.resumeInfo.model_dump_json()}\n\nNew User Input to merge: {transcript}"
+                        prompt_input = f"Current JSON: {session_data.resumeInfo.model_dump_json(exclude_none=True, exclude_defaults=True)}\n\nNew User Input to merge: {transcript}"
+                        
+                        import copy
+                        old_resume = copy.deepcopy(session_data.resumeInfo)
+                        
                         try:
                             updated_json_str = query_ai(prompt_input, ResumeInfo)
                             session_data.resumeInfo = ResumeInfo.model_validate_json(updated_json_str)
+                            diff_msg = generate_readback(old_resume, session_data.resumeInfo)
+                            readback = f"{diff_msg} If this is right, say continue. Else, tell me what to change."
                         except Exception as e:
                             print("Failed to merge info:", e)
+                            readback = f"I noted that down. If this is right, say continue. Else, tell me what to change."
                             
-                        readback = f"{user_intent.summary_of_provided_info} If this is right, say continue. Else, tell me what to change."
                         session_data.state = "WAITING_FOR_CONFIRM"
                         audio_b64 = get_tts_base64(readback)
                         await websocket.send_text(json.dumps({
@@ -232,11 +362,22 @@ async def websocket_endpoint(websocket: WebSocket):
                         }))
                         
                 elif session_data.state == "FINAL_REVIEW":
-                    intent_json_str = query_ai(transcript, UserIntent)
-                    try:
-                        user_intent = UserIntent.model_validate_json(intent_json_str)
-                    except:
+                    clean_t = ''.join(c for c in transcript.lower() if c.isalnum() or c.isspace()).strip()
+                    if clean_t in ["continue", "yes", "perfect", "looks good", "yep", "sure", "no", "nope", "nothing", "no thanks"]:
                         user_intent = UserIntent(intent="CONFIRM", summary_of_provided_info="")
+                    else:
+                        try:
+                            user_intent = needle.extract(transcript, schema=UserIntent)
+                            if user_intent is None or user_intent.intent == "OTHER":
+                                raise ValueError("Fallback to LLM")
+                        except Exception as e:
+                            print("Needle failed or returned OTHER in FINAL_REVIEW, falling back to LLM:", e)
+                            try:
+                                intent_json_str = query_ai(transcript, UserIntent)
+                                user_intent = UserIntent.model_validate_json(intent_json_str)
+                            except Exception as e2:
+                                print("LLM fallback failed:", e2)
+                                user_intent = UserIntent(intent="CONFIRM", summary_of_provided_info="")
                         
                     if user_intent.intent == "EXIT":
                         session_data.previous_state = "FINAL_REVIEW"
@@ -247,13 +388,19 @@ async def websocket_endpoint(websocket: WebSocket):
                             "type": "audio", "text": exit_msg, "audio_data": audio_b64
                         }))
                     elif user_intent.intent == "PROVIDE_INFO":
-                        prompt_input = f"Current JSON: {session_data.resumeInfo.model_dump_json()}\n\nNew User Input to merge: {transcript}"
+                        prompt_input = f"Current JSON: {session_data.resumeInfo.model_dump_json(exclude_none=True, exclude_defaults=True)}\n\nNew User Input to merge: {transcript}"
+                        
+                        import copy
+                        old_resume = copy.deepcopy(session_data.resumeInfo)
+                        
                         try:
                             updated_json_str = query_ai(prompt_input, ResumeInfo)
                             session_data.resumeInfo = ResumeInfo.model_validate_json(updated_json_str)
+                            diff_msg = generate_readback(old_resume, session_data.resumeInfo)
+                            msg = f"{diff_msg} Does the rest look good?"
                         except:
-                            pass
-                        msg = f"I noted that change: {user_intent.summary_of_provided_info}. Does the rest look good?"
+                            msg = f"I noted that change. Does the rest look good?"
+                            
                         audio_b64 = get_tts_base64(msg)
                         await websocket.send_text(json.dumps({
                             "type": "audio", "text": msg, "audio_data": audio_b64
