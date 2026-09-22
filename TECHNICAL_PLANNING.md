@@ -11,7 +11,7 @@
 ### Questions:
 1. Basic info: "Tell me your full name, location, contact details, and the job title you're targeting."
 
-2. Profile links: "Do you have a LinkedIn handle, GitHub username, portfolio link or other profiles you’d like to include?"
+2. Profile links: "Do you have a LinkedIn handle, GitHub username or portfolio link you’d like to include?"
 
 3. Professional summary: "How would you introduce yourself professionally in two or three sentences, and what are your main strengths?"
 
