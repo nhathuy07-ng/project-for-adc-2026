@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice CV Creator</title>
+    <title>CVSpeak</title>
     <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
     <header>
-        <h1>Voice-operated CV Builder</h1>
+        <h1>CVSpeak</h1>
+        <p class="subtitle">Voice-operated CV creator</p>
     </header>
     
     <main>
@@ -22,8 +23,18 @@
 
         <section class="controls">
             <button id="start-btn" aria-label="Start Interview">Start (Space)</button>
-            <button id="record-btn" aria-label="Start or Stop Recording">Record (F or J)</button>
-            <button id="next-btn" aria-label="Next Step">Next Step</button>
+            <button id="record-btn" aria-label="Start or Stop Recording" disabled>Record (F)</button>
+            <button id="next-btn" aria-label="Next Step" disabled>Next Step (J)</button>
+        </section>
+        <section class="controls" style="margin-top: 10px;">
+            <button id="repeat-btn" aria-label="Repeat Last Audio">Repeat (R)</button>
+            <button id="slower-btn" aria-label="Decrease Playback Speed">Slower ([)</button>
+            <button id="faster-btn" aria-label="Increase Playback Speed">Faster (])</button>
+        </section>
+
+        <section id="camera-region" style="display: none; text-align: center; margin-top: 20px;">
+            <video id="video" width="320" height="240" autoplay playsinline></video>
+            <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
         </section>
     </main>
 

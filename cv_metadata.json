@@ -27,7 +27,8 @@
         "name": "Grey and Pink Infographic",
         "description": "This layout positions a striking visual header block at the top, containing a large profile picture and brief bio. The skills section utilizes horizontal progress bars instead of plain text, offering a quick visual summary of technical proficiencies. The layout heavily emphasizes portfolio links and creative software skills over traditional chronological job descriptions.",
         "path": "CVs/Infographic CV/Grey_Pink_Minimal_Graphic_Designer_Resume",
-        "index_path": "CVs/Infographic CV/Grey_Pink_Minimal_Graphic_Designer_Resume/index.html"
+        "index_path": "CVs/Infographic CV/Grey_Pink_Minimal_Graphic_Designer_Resume/index.html",
+        "has_photo": true
     },
     "Infographic CV/Visual_Timeline_CV_HTML": {
         "name": "Visual Timeline",

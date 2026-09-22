@@ -7,7 +7,276 @@
 
 <title>Academic CV</title>
 
-<link rel="stylesheet" href="style.css">
+<style>
+/* Academic CurVe LaTeX Style Recreation */
+
+@page {
+    size: A4;
+    margin: 20mm;
+}
+
+
+body {
+
+    margin:0;
+
+    background:white;
+
+    color:#222;
+
+    font-family:
+    "Latin Modern Roman",
+    "Computer Modern",
+    "Times New Roman",
+    serif;
+
+    font-size:11pt;
+
+    line-height:1.45;
+
+}
+
+
+
+.cv-container {
+
+    width:794px;
+
+    margin:40px auto;
+
+}
+
+
+
+header {
+
+    position:relative;
+
+    margin-bottom:35px;
+
+    padding-bottom:15px;
+
+}
+
+
+
+.profile {
+
+    position:absolute;
+
+    right:0;
+
+    top:0;
+
+}
+
+
+
+.profile img {
+
+    width:100px;
+
+    height:100px;
+
+    object-fit:cover;
+
+}
+
+
+
+h1 {
+
+    font-family:
+
+    "Arial",
+    sans-serif;
+
+    font-size:30px;
+
+    font-weight:600;
+
+    margin:0 0 12px 0;
+
+}
+
+
+
+.contact {
+
+    font-size:12px;
+
+    color:#555;
+
+}
+
+
+.contact span {
+
+    margin-right:18px;
+
+}
+
+
+
+section {
+
+    margin-bottom:30px;
+
+    clear:both;
+
+}
+
+
+
+h2 {
+
+    font-family:
+
+    Arial,
+    sans-serif;
+
+    font-size:18px;
+
+    font-weight:600;
+
+    margin:0 0 14px 0;
+
+    padding-bottom:5px;
+
+    border-bottom:
+
+    2px solid #8aa000;
+
+}
+
+
+
+h3 {
+
+    font-family:
+
+    Arial,
+    sans-serif;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    margin-top:15px;
+
+    margin-bottom:10px;
+
+}
+
+
+
+.entry {
+
+    display:grid;
+
+    grid-template-columns:
+
+    140px 1fr;
+
+    margin-bottom:13px;
+
+}
+
+
+
+.year {
+
+    color:#444;
+
+    font-size:11pt;
+
+}
+
+
+
+.description {
+
+    text-align:left;
+
+}
+
+
+
+strong {
+
+    font-weight:700;
+
+}
+
+
+
+ol {
+
+    margin-top:5px;
+
+    padding-left:35px;
+
+}
+
+
+
+li {
+
+    margin-bottom:12px;
+
+    padding-left:5px;
+
+}
+
+
+
+li::marker {
+
+    font-weight:bold;
+
+}
+
+
+
+@media(max-width:850px){
+
+
+.cv-container{
+
+    width:90%;
+
+}
+
+
+
+.entry{
+
+    grid-template-columns:1fr;
+
+}
+
+
+
+.year{
+
+    margin-bottom:5px;
+
+    font-weight:bold;
+
+}
+
+
+.profile{
+
+    position:relative;
+
+    float:right;
+
+}
+
+
+}
+</style>
 
 </head>
 

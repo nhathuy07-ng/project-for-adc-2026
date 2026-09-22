@@ -3,6 +3,8 @@ import os
 import json
 import base64
 import time
+import cv2
+import numpy as np
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -15,6 +17,7 @@ from pydub import AudioSegment
 from pydub.effects import speedup
 
 app = FastAPI()
+face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 app.mount("/static", StaticFiles(directory="webUI"), name="static")
 
@@ -49,6 +52,33 @@ class FirstStepIntent(BaseModel):
 class UserIntent(BaseModel):
     intent: str = Field(description="Must be exactly one of: 'PROVIDE_INFO', 'CONFIRM', 'EXIT', 'OTHER'. Use PROVIDE_INFO if the user is giving resume details or amending previous details. Use CONFIRM if the user explicitly says 'continue', 'yes', 'perfect', or 'looks good'. Use EXIT if they want to stop or quit. Use OTHER if none fit.")
     summary_of_provided_info: str = Field(default="", description="If intent is PROVIDE_INFO, summarize what the user just provided in 1 short sentence (e.g., 'I noted down your email as bob@email.com').")
+
+from pydantic import create_model
+
+def get_model_for_step(step: int) -> type[BaseModel]:
+    if step == 1:
+        keys = ['fullName', 'location', 'contacts', 'targetJobTitle']
+    elif step == 2:
+        keys = ['profileURL']
+    elif step == 3:
+        keys = ['professionalSummary']
+    elif step == 4:
+        keys = ['experience']
+    elif step == 5:
+        keys = ['education']
+    elif step == 6:
+        keys = ['skillsAndTools']
+    elif step == 7:
+        keys = ['experience', 'education']
+    else:
+        keys = list(ResumeInfo.model_fields.keys())
+
+    fields = {}
+    for k in keys:
+        field_info = ResumeInfo.model_fields[k]
+        fields[k] = (field_info.annotation, field_info)
+    
+    return create_model(f'Step{step}Info', **fields)
 
 import re
 
@@ -132,10 +162,11 @@ class SessionData:
         self.interactionMode: InteractionMode = None
         self.currentStep: int = 0
         self.resumeInfo = ResumeInfo()
-        self.state = "ASKING" # ASKING, WAITING_FOR_CONFIRM, FINAL_REVIEW, SELECT_TEMPLATE, CONFIRM_EXIT
+        self.state = "ASKING" # ASKING, WAITING_FOR_CONFIRM, FINAL_REVIEW, SELECT_TEMPLATE, TAKE_PORTRAIT, CONFIRM_EXIT
         self.previous_state = "ASKING"
         self.last_transcript = ""
         self.answers = []
+        self.chosen_key = None
 
 session_data = SessionData()
 
@@ -155,9 +186,9 @@ def get_tts_base64(text: str):
         return base64.b64encode(f.read()).decode("utf-8")
 
 import jinja2
-import pdfkit
+from playwright.async_api import async_playwright
 
-def export_cv(template_key: str, resume_data: dict) -> str:
+async def export_cv(template_key: str, resume_data: dict) -> str:
     template_info = cv_metadata.get(template_key)
     if not template_info:
         return "Error: Template not found."
@@ -174,16 +205,28 @@ def export_cv(template_key: str, resume_data: dict) -> str:
     rendered_html = template.render(**cv_data)
     
     os.makedirs("exports", exist_ok=True)
-    pdf_path = f"exports/cv_{int(time.time())}.pdf"
+    safe_key = template_key.replace("/", "_").replace(" ", "_")
+    pdf_path = f"exports/cv_{safe_key}_{int(time.time())}.pdf"
     
     try:
-        pdfkit.from_string(rendered_html, pdf_path, options={"enable-local-file-access": ""})
-        return f"Successfully generated PDF at {pdf_path}"
-    except Exception as e:
-        print(f"PDF generation failed (wkhtmltopdf missing?): {e}")
         html_path = pdf_path.replace(".pdf", ".html")
         with open(html_path, "w", encoding="utf-8") as f:
             f.write(rendered_html)
+            
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            page = await browser.new_page()
+            
+            abs_path = os.path.abspath(html_path)
+            await page.goto(f"file://{abs_path}")
+            await page.emulate_media(media="print")
+            await page.pdf(path=pdf_path, format="A4", print_background=True)
+            await browser.close()
+            
+        os.remove(html_path)
+        return f"Successfully generated PDF at {pdf_path}"
+    except Exception as e:
+        print(f"PDF generation failed: {e}")
         return f"Saved as HTML at {html_path} because PDF generation failed."
 
 @app.websocket("/ws")
@@ -205,7 +248,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_text(json.dumps({
                     "type": "audio",
                     "text": current_prompt,
-                    "audio_data": audio_b64
+                    "audio_data": audio_b64,
+                    "is_question": True
                 }))
                 
             elif message.get("action") == "next_step":
@@ -219,7 +263,8 @@ async def websocket_endpoint(websocket: WebSocket):
                 await websocket.send_text(json.dumps({
                     "type": "audio",
                     "text": current_prompt,
-                    "audio_data": audio_b64
+                    "audio_data": audio_b64,
+                    "is_question": True
                 }))
                 
             elif message.get("action") == "submit_audio":
@@ -252,7 +297,7 @@ async def websocket_endpoint(websocket: WebSocket):
                             combined_text = f"Great, we will go step by step. {next_prompt}"
                             audio_b64 = get_tts_base64(combined_text)
                             await websocket.send_text(json.dumps({
-                                "type": "audio", "text": combined_text, "audio_data": audio_b64
+                                "type": "audio", "text": combined_text, "audio_data": audio_b64, "is_question": True
                             }))
                             continue
                         elif intent_val == "RAW_NOTES":
@@ -309,7 +354,7 @@ async def websocket_endpoint(websocket: WebSocket):
                                 combined_text = f"Got it. Next question: {next_prompt}"
                                 audio_b64 = get_tts_base64(combined_text)
                                 await websocket.send_text(json.dumps({
-                                    "type": "audio", "text": combined_text, "audio_data": audio_b64
+                                    "type": "audio", "text": combined_text, "audio_data": audio_b64, "is_question": True
                                 }))
                             else:
                                 session_data.state = "FINAL_REVIEW"
@@ -317,22 +362,45 @@ async def websocket_endpoint(websocket: WebSocket):
                                 final_text = f"Got it. We have finished all the questions. Here is your full CV so far. {full_cv} Is there anything else you want to amend before we choose a design?"
                                 audio_b64 = get_tts_base64(final_text)
                                 await websocket.send_text(json.dumps({
-                                    "type": "audio", "text": final_text, "audio_data": audio_b64
+                                    "type": "audio", "text": final_text, "audio_data": audio_b64, "is_question": True
                                 }))
                         else:
                             # User confirmed without providing info, possibly skipped.
-                            pass
+                            if session_data.currentStep < len(step_prompts) - 1:
+                                session_data.currentStep += 1
+                                session_data.state = "ASKING"
+                                next_prompt = step_prompts[session_data.currentStep]
+                                combined_text = f"Got it. Skipping to next question: {next_prompt}"
+                                audio_b64 = get_tts_base64(combined_text)
+                                await websocket.send_text(json.dumps({
+                                    "type": "audio", "text": combined_text, "audio_data": audio_b64, "is_question": True
+                                }))
+                            else:
+                                session_data.state = "FINAL_REVIEW"
+                                full_cv = generate_readback(ResumeInfo(), session_data.resumeInfo)
+                                final_text = f"Got it. We have finished all the questions. Here is your full CV so far. {full_cv} Is there anything else you want to amend before we choose a design?"
+                                audio_b64 = get_tts_base64(final_text)
+                                await websocket.send_text(json.dumps({
+                                    "type": "audio", "text": final_text, "audio_data": audio_b64, "is_question": True
+                                }))
                             
                     elif user_intent.intent == "PROVIDE_INFO":
                         print("Structuring data...")
-                        prompt_input = f"Current JSON: {session_data.resumeInfo.model_dump_json(exclude_none=True, exclude_defaults=True)}\n\nNew User Input to merge: {transcript}"
+                        StepModel = get_model_for_step(session_data.currentStep)
+                        current_data = session_data.resumeInfo.model_dump(include=set(StepModel.model_fields.keys()), exclude_none=True, exclude_defaults=True)
+                        prompt_input = f"Current JSON: {json.dumps(current_data)}\n\nNew User Input to merge: {transcript}"
                         
                         import copy
                         old_resume = copy.deepcopy(session_data.resumeInfo)
                         
                         try:
-                            updated_json_str = query_ai(prompt_input, ResumeInfo)
-                            session_data.resumeInfo = ResumeInfo.model_validate_json(updated_json_str)
+                            updated_json_str = query_ai(prompt_input, StepModel)
+                            updated_data = StepModel.model_validate_json(updated_json_str)
+                            
+                            # Merge back into ResumeInfo
+                            for k in StepModel.model_fields.keys():
+                                setattr(session_data.resumeInfo, k, getattr(updated_data, k))
+                                
                             diff_msg = generate_readback(old_resume, session_data.resumeInfo)
                             readback = f"{diff_msg} If this is right, say continue. Else, tell me what to change."
                         except Exception as e:
@@ -343,6 +411,18 @@ async def websocket_endpoint(websocket: WebSocket):
                         audio_b64 = get_tts_base64(readback)
                         await websocket.send_text(json.dumps({
                             "type": "audio", "text": readback, "audio_data": audio_b64
+                        }))
+                        
+                    elif user_intent.intent == "OTHER":
+                        msg = "I didn't quite catch that. Could you please repeat?"
+                        try:
+                            with open("webUI/audio/other_intent.wav", "rb") as f:
+                                audio_b64 = base64.b64encode(f.read()).decode("utf-8")
+                        except Exception:
+                            audio_b64 = get_tts_base64(msg)
+                            
+                        await websocket.send_text(json.dumps({
+                            "type": "audio", "text": msg, "audio_data": audio_b64
                         }))
                         
                 elif session_data.state == "CONFIRM_EXIT":
@@ -405,20 +485,39 @@ async def websocket_endpoint(websocket: WebSocket):
                         await websocket.send_text(json.dumps({
                             "type": "audio", "text": msg, "audio_data": audio_b64
                         }))
-                    else:
+                    elif user_intent.intent == "CONFIRM":
                         session_data.state = "SELECT_TEMPLATE"
-                        options_texts = []
-                        for idx, (key, info) in enumerate(cv_metadata.items()):
-                            options_texts.append(f"Option {idx + 1} is {info['name']}. {info['description']}")
-                            
-                        templates_summary = " ".join(options_texts)
-                        select_msg = f"Great! Let's choose a design. We have {len(cv_metadata)} options. {templates_summary} Which one would you prefer?"
-                        audio_b64 = get_tts_base64(select_msg)
+                        try:
+                            with open("webUI/audio/cv_list.wav", "rb") as f:
+                                audio_b64 = base64.b64encode(f.read()).decode('utf-8')
+                            select_msg = f"Great! Let's choose a design. We have {len(cv_metadata)} options."
+                        except Exception as e:
+                            print("Fallback to TTS for CV list", e)
+                            options_texts = []
+                            for idx, (key, info) in enumerate(cv_metadata.items()):
+                                options_texts.append(f"Option {idx + 1} is {info['name']}. {info['description']}")
+                            templates_summary = " ".join(options_texts)
+                            select_msg = f"Great! Let's choose a design. We have {len(cv_metadata)} options. {templates_summary} Which one would you prefer?"
+                            audio_b64 = get_tts_base64(select_msg)
+                        
                         
                         await websocket.send_text(json.dumps({
                             "type": "audio",
                             "text": select_msg,
-                            "audio_data": audio_b64
+                            "audio_data": audio_b64,
+                            "is_question": True
+                        }))
+                        
+                    elif user_intent.intent == "OTHER":
+                        msg = "I didn't quite catch that. Could you please repeat?"
+                        try:
+                            with open("webUI/audio/other_intent.wav", "rb") as f:
+                                audio_b64 = base64.b64encode(f.read()).decode("utf-8")
+                        except Exception:
+                            audio_b64 = get_tts_base64(msg)
+                            
+                        await websocket.send_text(json.dumps({
+                            "type": "audio", "text": msg, "audio_data": audio_b64
                         }))
                         
                 elif session_data.state == "SELECT_TEMPLATE":
@@ -435,19 +534,88 @@ async def websocket_endpoint(websocket: WebSocket):
                         chosen_key = list(cv_metadata.keys())[0] # Default to first if not understood
                         
                     if chosen_key:
-                        session_data.state = "DONE"
+                        session_data.chosen_key = chosen_key
+                        if cv_metadata[chosen_key].get("has_photo"):
+                            session_data.state = "TAKE_PORTRAIT"
+                            msg = "This template includes a photo frame. We will now take your portrait."
+                            audio_b64 = get_tts_base64(msg)
+                            await websocket.send_text(json.dumps({
+                                "type": "take_portrait",
+                                "text": msg,
+                                "audio_data": audio_b64
+                            }))
+                        else:
+                            session_data.state = "DONE"
+                            # Export
+                            export_result = await export_cv(chosen_key, session_data.resumeInfo.model_dump())
+                            final_msg = f"Perfect, I've selected that template and generated your file. {export_result}"
+                            audio_b64 = get_tts_base64(final_msg)
+                            await websocket.send_text(json.dumps({
+                                "type": "audio",
+                                "text": final_msg,
+                                "audio_data": audio_b64
+                            }))
+                            
+            elif message.get("action") == "video_frame":
+                if session_data.state == "TAKE_PORTRAIT":
+                    # decode base64 image
+                    img_data = base64.b64decode(message.get("image_data").split(",")[1])
+                    np_arr = np.frombuffer(img_data, np.uint8)
+                    img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+                    
+                    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+                    faces = face_cascade.detectMultiScale(gray, 1.1, 4)
+                    
+                    if len(faces) > 0:
+                        (x, y, w, h) = faces[0]
+                        h_frame, w_frame, _ = img.shape
+                        face_cx = x + w / 2
+                        face_cy = y + h / 2
                         
-                        # Export
-                        export_result = export_cv(chosen_key, session_data.resumeInfo.model_dump())
+                        center_x = w_frame / 2
+                        center_y = h_frame / 2
                         
-                        final_msg = f"Perfect, I've selected that template and generated your file. {export_result}"
-                        audio_b64 = get_tts_base64(final_msg)
+                        tolerance_x = w_frame * 0.15
+                        tolerance_y = h_frame * 0.15
                         
+                        area_ratio = (w * h) / (w_frame * h_frame)
+                        
+                        if face_cx < center_x - tolerance_x:
+                            command = "right"
+                        elif face_cx > center_x + tolerance_x:
+                            command = "left"
+                        elif face_cy < center_y - tolerance_y:
+                            command = "down"
+                        elif face_cy > center_y + tolerance_y:
+                            command = "up"
+                        elif area_ratio < 0.10:
+                            command = "closer"
+                        elif area_ratio > 0.45:
+                            command = "further"
+                        else:
+                            command = "perfect"
+                            
                         await websocket.send_text(json.dumps({
-                            "type": "audio",
-                            "text": final_msg,
-                            "audio_data": audio_b64
+                            "type": "guidance",
+                            "command": command
                         }))
+                        
+            elif message.get("action") == "portrait_action":
+                if session_data.state == "TAKE_PORTRAIT":
+                    action = message.get("button")
+                    if action == "F":
+                        # use the base64 string directly as the profile URL to avoid local path issues in playwright
+                        session_data.resumeInfo.profileURL = message.get("image_data")
+                    
+                    session_data.state = "DONE"
+                    export_result = await export_cv(session_data.chosen_key, session_data.resumeInfo.model_dump())
+                    final_msg = f"Perfect, I've selected that template and generated your file. {export_result}"
+                    audio_b64 = get_tts_base64(final_msg)
+                    await websocket.send_text(json.dumps({
+                        "type": "audio",
+                        "text": final_msg,
+                        "audio_data": audio_b64
+                    }))
                         
     except WebSocketDisconnect:
         print("Client disconnected")

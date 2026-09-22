@@ -38,10 +38,12 @@ resume_data = {
 with open("cv_metadata.json", "r") as f:
     cv_metadata = json.load(f)
 
+import asyncio
+
 for key in cv_metadata.keys():
     print(f"Testing template: {key}...")
     try:
-        pdf_base64 = export_cv(key, resume_data)
+        pdf_base64 = asyncio.run(export_cv(key, resume_data))
         if pdf_base64.startswith("Error"):
             print(f"  ❌ FAILED: {pdf_base64}")
         else:
