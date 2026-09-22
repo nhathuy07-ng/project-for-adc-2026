@@ -17,9 +17,11 @@
 
 4. Experience: "Walk me through your relevant past experiences — this can include traditional jobs, freelance work, side gigs, or community volunteering. What was the role, where and when was it, and what did you achieve?"
 
-5. Skills and Tools: "What tools, technologies, software, or domain expertise do you use most often in your day-to-day work?"
+5. Education & Formal Training: "What is your educational background? Mention your degree or field of study, school or training program, and graduation year—or let me know if you are self-taught or currently studying."
 
-6. Projects & Certifications: "Are there any standout projects, licenses, or certifications you’d like to highlight?"
+6. Skills and Tools: "What tools, technologies, software, or domain expertise do you use most often in your day-to-day work?"
+
+7. Projects & Certifications: "Are there any standout projects, licenses, or certifications you’d like to highlight?"
 
 ### Reconfirmation (not in 1st proto.)
 
@@ -29,7 +31,9 @@
 
 ### Interruptible voice-line
 
-3. Allow voice-line to be interruptible (using F or J keys), and allow for jumping back and forth (e.g "Wait, I want to change something in <part>.", or "By the way, ...").
+1. Allow voice-line to be interruptible (using F or J keys), and allow for jumping back and forth (e.g "Wait, I want to change something in <part>.", or "By the way, ...").
+
+2. Allow task to be stopped midway thru.
 
 ### Export
 
@@ -44,5 +48,6 @@
 4. User makes amendment.
 5. System reads back what's changed.
 6. Loop until user's statisfied. If nothing changes, system will ask if it needs reading back once more.
+
 
 ## Portfolio creation: Later on

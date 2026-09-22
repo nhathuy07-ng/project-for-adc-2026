@@ -26,6 +26,14 @@ class Experience:
         self.startTime = ""
         self.endTime = ""
 
+class Education:
+    def __init__(self):
+        self.institution: str = ""
+        self.details: list[str] = ""
+        self.graduationTime: str = ""
+        self.location: str = ""
+        
+
 class UserInfo:
     def __init__(self):
         self.fullName: str = None
@@ -35,6 +43,7 @@ class UserInfo:
         self.profileURL: str = ""
         self.professionalSummary: str = "" # basic HTML tags allowed
         self.experience: list[Experience] = []
+        self.education: list[]
         self.skillsAndTools: list[str] = [] # one item per line, basic HTML tags allowed
 
 
